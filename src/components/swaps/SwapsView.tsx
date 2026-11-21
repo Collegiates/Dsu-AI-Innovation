@@ -129,7 +129,7 @@ export function SwapsView({ products, stores }: { products: Product[]; stores: S
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState icon={CircleCheck} title="You're already buying the best value we found" description="No cheaper similar product on your route for the items on your list." />
+        <EmptyState icon={CircleCheck} title="You're already buying the best value we found" description="No cheaper similar product at your stores for the items on your list." />
       ) : (
         <ul className="space-y-3">
           {rows.map((swap) => (

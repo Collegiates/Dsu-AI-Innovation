@@ -14,6 +14,8 @@ import { DEFAULT_USUAL_STORE_ID, optimizeTrip, type TripResult } from "@/lib/tri
 export type DashboardData = {
   trip: TripResult;
   stores: Store[];
+  /** Stores that have collected prices; the others are shown as "Prices coming soon". */
+  pricedStoreIds: string[];
   itemCount: number;
   unmatched: string[];
   recall: RecallMatch | null;
@@ -50,6 +52,6 @@ export async function getDashboardData(preference: TripPreference = "balanced"):
 
   return {
     ok: true,
-    data: { trip, stores, itemCount: basket.length, unmatched, recall: recallMatches[0] ?? null, recallCount: recallMatches.length, deals },
+    data: { trip, stores, pricedStoreIds: [...new Set(products.map((p) => p.storeId))], itemCount: basket.length, unmatched, recall: recallMatches[0] ?? null, recallCount: recallMatches.length, deals },
   };
 }

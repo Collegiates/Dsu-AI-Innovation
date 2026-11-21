@@ -7,7 +7,7 @@ import "./landing.css";
 
 /**
  * The first screen: the promise in one line, what the app does in one sentence, and the "Try the demo" button,
- * with the animated commute drawing behind them.
+ * with the animated store drawing behind them.
  */
 export function Hero() {
   return (
@@ -15,13 +15,13 @@ export function Hero() {
       <CommuteAnimation className="pointer-events-none absolute right-[3%] bottom-8 w-[90%] max-w-[1320px] select-none" />
       <p className="absolute right-[4%] bottom-3 text-xs text-muted-foreground">Illustration</p>
       <div className="landing-hero-text relative mx-auto flex min-h-[calc(100vh-4.5rem)] max-w-6xl flex-col px-10 pt-20 pb-64">
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Groceries, planned around your commute</p>
+        <p className="text-sm font-semibold tracking-wide text-primary uppercase">Groceries, priced across your stores</p>
         <h1 id="hero-title" className="mt-4 max-w-2xl font-display text-6xl leading-[1.05] font-semibold tracking-tight">
-          Save on the drive you already make.
+          Pay less at the stores you already shop at.
         </h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-          {APP_NAME} matches your weekly list to real prices at the stores on your way home, then tells you which stop saves the most once gas and time are
-          counted.
+          {APP_NAME} matches your weekly list to real prices at the stores you pick, then tells you where to shop, and whether a second stop is worth
+          it.
         </p>
         <div className="mt-9 flex items-center gap-4">
           <Button asChild size="lg" className="h-12 px-6 text-base">

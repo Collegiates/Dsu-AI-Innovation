@@ -12,7 +12,7 @@ const sans = Inter({ variable: "--font-sans", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: APP_NAME,
-  description: "Buy your weekly groceries for less, using stores already on your commute.",
+  description: "Buy your weekly groceries for less, at the stores you already shop at.",
 };
 
 /**

@@ -11,6 +11,8 @@ const SCHEMAS = {
   waitlist: { schema: z.array(WaitlistItemSchema).max(100), fallback: [] as WaitlistItem[] },
   selectedPreference: { schema: z.enum(["fastest", "balanced", "maxSavings"]), fallback: "balanced" as TripPreference },
   list: { schema: z.array(ListEntrySchema).max(100), fallback: [] as ListEntry[] },
+  // The stores the shopper chose to shop at. Walmart and ALDI are the two with collected prices.
+  selectedStores: { schema: z.array(short).max(20), fallback: ["walmart-dover", "aldi-dover"] as string[] },
 } as const;
 
 /** The browser event fired after any setting is saved, so every open page updates at once. */

@@ -127,7 +127,7 @@ export function DealWatch({ products, stores, nextWeek }: { products: Product[];
                 ) : (
                   <>
                     <p className="font-medium">{item.groupKey}</p>
-                    <p className="text-sm text-muted-foreground">No store on your route sells this right now.</p>
+                    <p className="text-sm text-muted-foreground">None of the stores sells this right now.</p>
                   </>
                 )}
               </div>

@@ -201,3 +201,60 @@ describe("trip optimizer", () => {
     expect(() => optimizeTrip({ basket: [], products: [], stores, preference: "balanced" })).toThrow(/at most 5 stores/);
   });
 });
+
+describe("trip optimizer with unmeasured (null) detours", () => {
+  // The shopper picked these stores; nobody measured a detour, so the stores carry null, not 0.
+  const walmartNull = makeStore("walmart-dover", null, null);
+  const aldiNull = makeStore("aldi-dover", null, null);
+  const products = [
+    makeProduct("walmart-dover", "Milk", 3.0, { groupKey: "milk" }),
+    makeProduct("aldi-dover", "Milk", 2.8, { groupKey: "milk" }),
+    makeProduct("walmart-dover", "Coffee", 9.0, { groupKey: "coffee" }),
+    makeProduct("aldi-dover", "Coffee", 5.0, { groupKey: "coffee" }),
+    makeProduct("walmart-dover", "Eggs", 2.0, { groupKey: "eggs" }),
+  ];
+  const basket = ["milk", "coffee", "eggs"].map((n) => ({ usualProductId: `walmart-dover--${n}` }));
+
+  it("scores a trip as groceries plus $3.00 (10 min × $0.30) for each store beyond the first, with no gas", () => {
+    const { recommended } = optimizeTrip({ basket, products, stores: [walmartNull, aldiNull], preference: "balanced" });
+    // ALDI milk + coffee ($7.80) and Walmart eggs ($2.00): saves $4.20 at the register, more than the $3.00 extra stop.
+    expect(recommended.storeIds.sort()).toEqual(["aldi-dover", "walmart-dover"]);
+    expect(recommended.checkoutTotalCents).toBe(980);
+    expect(recommended.gasCostCents).toBe(0);
+    expect(recommended.extraMinutes).toBe(10);
+    expect(recommended.timeCostCents).toBe(300);
+    expect(recommended.scoreCents).toBe(1280);
+  });
+
+  it("keeps one stop when a second stop isn't worth it", () => {
+    // Without the coffee, ALDI only saves $0.20 on milk: far less than the $3.00 extra stop.
+    const small = basket.filter((b) => !b.usualProductId.endsWith("coffee"));
+    const { recommended } = optimizeTrip({ basket: small, products, stores: [walmartNull, aldiNull], preference: "balanced" });
+    expect(recommended.storeIds).toEqual(["walmart-dover"]);
+    expect(recommended.extraMinutes).toBe(0);
+    expect(recommended.scoreCents).toBe(500);
+  });
+
+  it("with maximize savings (time free), takes the second stop for any saving", () => {
+    const small = basket.filter((b) => !b.usualProductId.endsWith("coffee"));
+    const { recommended } = optimizeTrip({ basket: small, products, stores: [walmartNull, aldiNull], preference: "maxSavings" });
+    expect(recommended.storeIds.sort()).toEqual(["aldi-dover", "walmart-dover"]);
+    expect(recommended.checkoutTotalCents).toBe(480);
+  });
+
+  it("regression: null detours never produce NaN or $0 totals", () => {
+    for (const preference of ["fastest", "balanced", "maxSavings"] as const) {
+      const result = optimizeTrip({ basket, products, stores: [walmartNull, aldiNull], preference });
+      const plans = [result.recommended, result.cheapestSingleStore, result.fastest].filter((p) => p !== null);
+      for (const plan of plans) {
+        for (const value of [plan.checkoutTotalCents, plan.gasCostCents, plan.extraMinutes, plan.timeCostCents, plan.scoreCents, plan.savingsCents]) {
+          expect(Number.isFinite(value), `${preference}: ${JSON.stringify(plan.storeIds)}`).toBe(true);
+        }
+        expect(plan.checkoutTotalCents).toBeGreaterThan(0);
+        expect(plan.scoreCents).toBeGreaterThan(0);
+      }
+      expect(Number.isFinite(result.baseline.gasCostCents) && Number.isFinite(result.baseline.extraMinutes)).toBe(true);
+      expect(result.baseline.checkoutTotalCents).toBe(1400);
+    }
+  });
+});

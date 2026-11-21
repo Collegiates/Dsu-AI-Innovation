@@ -64,7 +64,7 @@ describe("Recalls & Safety", () => {
     const user = userEvent.setup();
     render(<RecallsView products={products} />);
     await user.click(screen.getByRole("button", { name: "Check my list now" }));
-    expect(await screen.findByText("No possible matches")).toBeInTheDocument();
+    expect(await screen.findByText("No recall matches for this week's list")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Saved copy of openFDA data (offline)");
   });
 
@@ -86,5 +86,15 @@ describe("Recalls & Safety", () => {
   it("builds an FDA record link that safely encodes the recall number", () => {
     expect(fdaRecordUrl("H-0167-2027")).toBe("https://api.fda.gov/food/enforcement.json?search=recall_number:%22H-0167-2027%22");
     expect(fdaRecordUrl('x" OR "1')).not.toContain('"');
+  });
+
+  it("shows the national recall example as a labeled hypothetical past purchase, with the FDA's lot code and link", () => {
+    render(<RecallsView products={[]} />);
+    const card = screen.getByRole("region", { name: "Great Value Organic Triple Berry Blend, 10 oz" });
+    expect(card).toHaveTextContent("Past purchases (demo)");
+    expect(card).toHaveTextContent("National recall example: hypothetical past purchase; not listed for Delaware.");
+    expect(card).toHaveTextContent("6040 01-6");
+    expect(card).toHaveTextContent("7874211226");
+    expect(within(card).getByRole("link", { name: /Read the FDA announcement/ })).toHaveAttribute("href", expect.stringMatching(/^https:\/\/www\.fda\.gov\//));
   });
 });

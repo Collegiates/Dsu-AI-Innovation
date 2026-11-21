@@ -76,6 +76,6 @@ describe("Deal Watch", () => {
     writePreference("waitlist", [{ groupKey: "caviar" }]);
     render(<DealWatch products={products} stores={stores} nextWeek={null} />);
     expect(screen.queryByRole("button", { name: "Simulate next week's prices" })).not.toBeInTheDocument();
-    expect(screen.getByText("No store on your route sells this right now.")).toBeInTheDocument();
+    expect(screen.getByText("None of the stores sells this right now.")).toBeInTheDocument();
   });
 });

@@ -1,15 +1,14 @@
 "use client";
 
-import { EyeOff, MapPin, X } from "lucide-react";
+import { EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, type ReactNode } from "react";
+import { StorePicker } from "@/components/plan/StorePicker";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { PreferencePicker } from "@/components/shared/PreferencePicker";
 import { Button } from "@/components/ui/button";
-import { COMMUTE } from "@/lib/config/app";
 import type { Product, Store } from "@/lib/data/schema";
 import { usePreference } from "@/lib/preferences/usePreference";
-import { detourText } from "@/lib/trip/detour";
 
 function Section({ id, title, description, children }: { id: string; title: string; description: string; children: ReactNode }) {
   return (
@@ -40,7 +39,7 @@ function HiddenList({ items, label, empty, onRemove }: { items: { key: string; n
 }
 
 /**
- * Settings: the demo commute (read-only), the stores on it with their detours, the default trip preference,
+ * Settings: the stores you shop at (the same picker as the Dashboard), the default trip preference,
  * and the brands and products hidden from Smart Swaps, each with a button to show it again.
  * Example: removing "Equate" from hidden brands lets Equate swaps appear on Smart Swaps again.
  */
@@ -49,45 +48,12 @@ export function SettingsView({ products, stores }: { products: Product[]; stores
   const { value: hiddenBrands, ready: brandsReady, save: saveBrands } = usePreference("hiddenBrands");
   const { value: hiddenProducts, ready: productsReady, save: saveProducts } = usePreference("hiddenProducts");
   const productsById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
-  const ordered = [...stores].sort((a, b) => a.detourMinutes - b.detourMinutes || a.id.localeCompare(b.id));
+  const pricedStoreIds = useMemo(() => [...new Set(products.map((p) => p.storeId))], [products]);
 
   return (
     <div className="grid grid-cols-2 items-start gap-6">
       <div className="space-y-6">
-        <Section id="commute-title" title="Commute" description="The drive the app plans your shopping around.">
-          <p className="flex items-center gap-2 text-lg font-medium">
-            <MapPin aria-hidden className="size-5 text-primary" />
-            {COMMUTE.from} → {COMMUTE.to}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">This demo has one fixed route. Stores are compared by the extra drive they add to it.</p>
-        </Section>
-
-        <Section id="stores-title" title="Stores on your route" description="Extra driving each store adds compared with going straight home.">
-          <table className="w-full text-sm">
-            <thead className="sr-only">
-              <tr>
-                <th scope="col">Store</th>
-                <th scope="col">Detour</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {ordered.map((store) => (
-                <tr key={store.id}>
-                  <td className="py-2.5">
-                    <p className="font-medium">{store.chain}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {store.name} · {store.address}
-                    </p>
-                  </td>
-                  <td className="py-2.5 text-right tabular-nums">
-                    <p className="font-medium">{detourText(store)}</p>
-                    <p className="text-xs text-muted-foreground">{store.onRouteLabel}</p>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Section>
+        <StorePicker stores={stores} pricedStoreIds={pricedStoreIds} columns={2} />
       </div>
 
       <div className="space-y-6">

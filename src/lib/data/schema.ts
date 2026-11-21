@@ -9,9 +9,9 @@ export const SizeUnitSchema = z.enum(SIZE_UNITS);
 export type SizeUnit = z.infer<typeof SizeUnitSchema>;
 
 /**
- * One store on the demo commute, with how much extra driving it adds compared with going straight home.
- * Example: { id: "aldi-dover", detourMinutes: 4, detourMiles: 1.2 } means Aldi adds 4 minutes and 1.2 miles.
- * Detours are required: a store whose detour was never measured is rejected rather than treated as zero.
+ * One store the shopper can pick, with its name and address.
+ * Detours are optional: null means "not measured", and the app never shows or treats it as 0.
+ * Example: { id: "aldi-dover", name: "ALDI Dover", detourMinutes: null, detourMiles: null }.
  */
 export const StoreSchema = z.object({
   id: z.string().min(1),
@@ -19,8 +19,8 @@ export const StoreSchema = z.object({
   chain: z.string().min(1),
   address: z.string().min(1),
   onRouteLabel: z.string().min(1),
-  detourMinutes: z.number().finite().nonnegative(),
-  detourMiles: z.number().finite().nonnegative(),
+  detourMinutes: z.number().finite().nonnegative().nullable(),
+  detourMiles: z.number().finite().nonnegative().nullable(),
 });
 export type Store = z.infer<typeof StoreSchema>;
 

@@ -73,13 +73,3 @@ export const inputLimits = {
   aiRequestsPerMinute: 30,
 } as const;
 
-/**
- * The commute the app plans around. Stores are compared by how much they add to this drive.
- * Example: Walmart is "on your route", so stopping there adds 0 extra miles.
- */
-export const COMMUTE = {
-  id: "dsu-home",
-  label: "DSU → Home",
-  from: "DSU",
-  to: "Home",
-} as const;

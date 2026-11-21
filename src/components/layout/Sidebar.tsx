@@ -1,15 +1,15 @@
 "use client";
 
-import { Leaf, MapPin } from "lucide-react";
+import { Leaf } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { APP_NAME, COMMUTE } from "@/lib/config/app";
+import { APP_NAME } from "@/lib/config/app";
 import { cn } from "@/lib/utils";
 import { activeNavItem, NAV_ITEMS } from "./nav";
 
 /**
  * The left sidebar: the app name, the links to every page (with the current page highlighted),
- * and a short summary of the commute the app plans around. Example: on /deals, "Deal Watch" is highlighted.
+ * Example: on /deals, "Deal Watch" is highlighted.
  */
 export function Sidebar() {
   const active = activeNavItem(usePathname());
@@ -45,14 +45,6 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      <div className="rounded-lg border border-sidebar-border bg-surface p-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Your commute</p>
-        <p className="mt-1 flex items-center gap-1.5 text-sm font-medium">
-          <MapPin aria-hidden className="size-3.5 text-primary" />
-          {COMMUTE.from} → {COMMUTE.to}
-        </p>
-        <p className="mt-0.5 text-xs text-muted-foreground">Stores are compared by the extra drive they add.</p>
-      </div>
     </aside>
   );
 }

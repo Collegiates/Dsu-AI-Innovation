@@ -36,3 +36,21 @@ export const DEMO_WAITLIST = [
   { groupKey: "paper-towels-6roll", targetPrice: 7.5 },
   { groupKey: "detergent-liquid-freeclear" },
 ];
+
+/**
+ * A national FDA recall shown as a hypothetical past purchase, so the demo can show what a recall alert looks like.
+ * Every fact is copied from the FDA-posted company announcement (Sept 2, 2026) linked below; the "past purchase" is made up
+ * and labeled so. The recall did not list Delaware. Example: shown as a banner on Trip Plan and in full on Recalls & Safety.
+ */
+export const DEMO_PAST_PURCHASE_RECALL = {
+  label: "National recall example: hypothetical past purchase; not listed for Delaware.",
+  product: "Great Value Organic Triple Berry Blend, 10 oz",
+  upc: "7874211226",
+  lotCode: "6040 01-6",
+  bestBy: "February 9, 2028",
+  reason: "Possible contamination with E. coli O145",
+  firm: "Frutas y Hortalizas del Sur S.A.",
+  announced: "September 2, 2026",
+  recallNumber: "H-1380-2026",
+  url: "https://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts/frutas-y-hortalizas-del-sur-sa-expands-recall-include-one-lot-great-value-frozen-organic-triple",
+} as const;

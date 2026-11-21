@@ -2,9 +2,9 @@ import { ArrowRight, ListChecks, Route, Store, type LucideIcon } from "lucide-re
 import { Reveal } from "./Reveal";
 
 const STEPS: { icon: LucideIcon; title: string; text: string }[] = [
-  { icon: Store, title: "Pick your stores", text: "Choose the stores on your drive home. We note how far each one is off your route." },
+  { icon: Store, title: "Pick your stores", text: "Tick the stores you already shop at. Only those are compared." },
   { icon: ListChecks, title: "Add your list", text: "Type it the way you'd write it, like “2% milk, eggs, rice”. Each line is matched to a real product." },
-  { icon: Route, title: "We find the cheapest stop", text: "Every combination of stores is priced, with gas and time counted, so you know where to stop and what to buy." },
+  { icon: Route, title: "We find the cheapest stop", text: "Every combination of your stores is priced, and a second stop is added only when it saves enough, so you know where to shop and what to buy." },
 ];
 
 /** "How it works": three numbered steps in a row, each sliding in as it scrolls into view. */

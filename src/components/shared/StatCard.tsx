@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * A small labeled number, such as "Extra time: +14 min". The value is passed in already formatted.
- * Example: <StatCard label="Gas" value={<Money cents={15} />} hint="1.0 extra mile" />.
+ * A small labeled number, such as "Groceries: $41.20". The value is passed in already formatted.
+ * Example: <StatCard label="Groceries" value={<Money cents={4120} />} hint="at ALDI" />.
  */
 export function StatCard({ label, value, hint, className }: { label: string; value: ReactNode; hint?: string; className?: string }) {
   return (

@@ -10,7 +10,7 @@ const PREFERENCE_NAMES = { fastest: "Fastest", balanced: "Balanced", maxSavings:
 
 /**
  * The Dashboard's main block: what this week's list costs with the recommended trip versus the usual trip,
- * and how much that saves in dollars and percent. "Typical" means the usual products at the usual store, plus gas.
+ * and how much that saves in dollars and percent. "Typical" means the usual products at the usual store.
  * Example: "You save $6.42 (14%) — $39.10 instead of $45.52".
  */
 export function SavingsHero({ trip, itemCount }: { trip: TripResult; itemCount: number }) {
@@ -45,10 +45,10 @@ export function SavingsHero({ trip, itemCount }: { trip: TripResult; itemCount: 
       <p className="mt-2 text-lg text-muted-foreground">
         {saves ? (
           <>
-            <span className="font-semibold text-savings">{percent}% less</span> than your usual trip, gas included.
+            <span className="font-semibold text-savings">{percent}% less</span> than your usual trip.
           </>
         ) : (
-          "No other stop saves enough to be worth the drive this week."
+          "No other store saves enough to be worth a second stop this week."
         )}
       </p>
 

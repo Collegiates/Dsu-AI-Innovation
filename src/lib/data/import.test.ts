@@ -44,14 +44,19 @@ describe("importCatalog", () => {
     expect(result.products[0].salePrice).toBeUndefined();
   });
 
-  it("rejects a blank detour with the row number, instead of treating it as 0", () => {
+  it("stores a blank detour as null (not measured), never as 0", () => {
     const result = importCatalog(files([storeRow("walmart-dover"), storeRow("aldi-dover", "", "")], [], []));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.stores[1]).toMatchObject({ id: "aldi-dover", detourMinutes: null, detourMiles: null });
+  });
+
+  it("still rejects a detour that is not a number or is negative", () => {
+    const result = importCatalog(files([storeRow("aldi-dover", "soon", "-1")], [], []));
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.errors).toEqual([
-      "stores.csv row 3: detour_minutes is blank (a blank is never treated as 0)",
-      "stores.csv row 3: detour_miles is blank (a blank is never treated as 0)",
-    ]);
+    expect(result.errors.join("\n")).toMatch(/row 2: detour_minutes is not a number/);
+    expect(result.errors.join("\n")).toMatch(/row 2: detour_miles must be 0 or more/);
   });
 
   it("rejects invalid product rows with the row number and the bad value", () => {

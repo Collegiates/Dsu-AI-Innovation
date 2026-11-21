@@ -8,6 +8,7 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/client";
+import { PastPurchaseRecall } from "./PastPurchaseRecall";
 import type { Product } from "@/lib/data/schema";
 import type { RecallMatch } from "@/lib/recalls/match";
 import { usePreference } from "@/lib/preferences/usePreference";
@@ -55,16 +56,19 @@ export function RecallsView({ products }: { products: Product[] }) {
   if (!ready) return <LoadingSkeleton className="h-64" />;
   if (productIds.length === 0) {
     return (
-      <EmptyState
-        icon={ListChecks}
-        title="No list to check yet"
-        description="Add your weekly items on My List, then check them against FDA food recalls here."
-        action={
-          <Button asChild>
-            <Link href="/list">Go to My List</Link>
-          </Button>
-        }
-      />
+      <div className="space-y-5">
+        <EmptyState
+          icon={ListChecks}
+          title="No list to check yet"
+          description="Add your weekly items on My List, then check them against FDA food recalls here."
+          action={
+            <Button asChild>
+              <Link href="/list">Go to My List</Link>
+            </Button>
+          }
+        />
+        <PastPurchaseRecall />
+      </div>
     );
   }
 
@@ -103,7 +107,7 @@ export function RecallsView({ products }: { products: Product[] }) {
         <EmptyState icon={ShieldCheck} title="Not checked yet" description="Press Check my list now to compare your list with recent FDA food recalls." />
       ) : null}
       {state.kind === "done" && state.reply.matches.length === 0 ? (
-        <EmptyState icon={CircleCheck} title="No possible matches" description="None of the products on your list match a recent FDA food recall." />
+        <EmptyState icon={CircleCheck} title="No recall matches for this week's list" description="None of the products on your list match a recent FDA food recall." />
       ) : null}
       {state.kind === "done" && state.reply.matches.length > 0 ? (
         <ul className="space-y-3">
@@ -146,6 +150,7 @@ export function RecallsView({ products }: { products: Product[] }) {
           ))}
         </ul>
       ) : null}
+      <PastPurchaseRecall />
     </div>
   );
 }

@@ -18,19 +18,19 @@ test("Recalls & Safety: checks the list against FDA recalls and says when and fr
   await expect(page.getByRole("status")).toContainText(/Last checked .* against [\d,]+ FDA food recalls/);
   await expect(page.getByRole("status")).toContainText("Saved copy of openFDA data (offline)");
   // The real catalog has no recalled products today, so the result is a calm "no matches" (never a made-up alarm).
-  await expect(page.getByText("No possible matches")).toBeVisible();
+  await expect(page.getByText("No recall matches for this week's list")).toBeVisible();
 
   if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.SCREENSHOT_DIR}/recalls-1440x900.png` });
 });
 
-test("Settings: shows the route and stores, saves the default preference, and un-hides brands", async ({ page }) => {
+test("Settings: shows the stores by name and address, saves the default preference, and un-hides brands", async ({ page }) => {
   // Settings needs the demo login.
   await page.addInitScript((key) => localStorage.setItem(key, "true"), DEMO_FLAG_KEY);
   await page.goto("/settings");
-  const stores = page.getByRole("region", { name: "Stores on your route" });
-  await expect(stores.getByText("Walmart", { exact: true })).toBeVisible();
-  await expect(stores.getByText("On your route", { exact: true })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Commute" })).toContainText("DSU → Home");
+  const stores = page.getByRole("region", { name: "Your stores" });
+  await expect(stores.getByText("Walmart Supercenter #1736", { exact: true })).toBeVisible();
+  await expect(stores).toContainText("10 N Dupont Hwy, Bldg 5, Dover, DE 19901");
+  await expect(stores).not.toContainText(/\+\d+ min|\d mi\b|detour|on your route|commute/i);
   await expect(page.getByText("No hidden brands.")).toBeVisible();
 
   await page.getByRole("region", { name: "Default trip preference" }).getByText("Maximize savings").click();

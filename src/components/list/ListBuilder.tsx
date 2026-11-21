@@ -24,7 +24,7 @@ import { DEFAULT_USUAL_STORE_ID } from "@/lib/trip/optimizer";
 
 const HINTS: Partial<Record<ListEntry["label"], string>> = {
   Similar: "Close match. Check it's what you usually buy.",
-  "No match": "None of the stores on your route list this. Try a simpler name, like \"rice\" instead of a brand.",
+  "No match": "None of the stores lists this. Try a simpler name, like \"rice\" instead of a brand.",
 };
 
 /**

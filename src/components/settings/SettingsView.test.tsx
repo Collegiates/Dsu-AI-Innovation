@@ -7,26 +7,35 @@ import { SettingsView } from "./SettingsView";
 
 vi.mock("next/link", () => ({ default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => <a href={href} {...rest}>{children}</a> }));
 
-const stores = [{ ...makeStore("aldi-dover", 4, 1.2), chain: "ALDI" }, { ...makeStore("walmart-dover", 0, 0), chain: "Walmart" }];
+const stores = [
+  { ...makeStore("aldi-dover", null, null), chain: "ALDI", name: "ALDI Dover", address: "10 N Dupont Hwy, Dover, DE 19901" },
+  { ...makeStore("target-dover", null, null), chain: "Target", name: "Target Dover", address: "148 John Hunn Brown Rd, Dover, DE 19901" },
+];
 const butter = makeProduct("aldi-dover", "Creamy Peanut Butter", 1.65, { brand: "Peanut Delight" });
 
 beforeEach(() => localStorage.clear());
 
 describe("Settings", () => {
-  it("shows the commute and the stores on it, nearest first, with their detours", () => {
+  it("shows the stores by name and address, with no detours; stores without prices can't be picked", async () => {
+    const user = userEvent.setup();
     render(<SettingsView products={[butter]} stores={stores} />);
-    expect(screen.getByRole("region", { name: "Commute" })).toHaveTextContent("DSU → Home");
-    const rows = within(screen.getByRole("region", { name: "Stores on your route" })).getAllByRole("row").slice(1);
-    expect(rows.map((r) => within(r).getAllByRole("cell")[0].querySelector("p")?.textContent)).toEqual(["Walmart", "ALDI"]);
-    expect(rows[0]).toHaveTextContent("On your route");
-    expect(rows[1]).toHaveTextContent("+4 min · 1.2 mi");
+    const picker = screen.getByRole("region", { name: "Your stores" });
+    expect(picker).toHaveTextContent("10 N Dupont Hwy, Dover, DE 19901");
+    expect(picker.textContent).not.toMatch(/\bmin\b|\bmi\b|detour|on your route|commute/i);
+    const target = within(picker).getByRole("checkbox", { name: /Target Dover/ });
+    expect(target).toBeDisabled();
+    expect(within(picker).getByText("Prices coming soon")).toBeInTheDocument();
+    const aldi = within(picker).getByRole("checkbox", { name: /ALDI Dover/ });
+    expect(aldi).toBeChecked();
+    await user.click(aldi);
+    expect(readPreference("selectedStores")).toEqual(["walmart-dover"]);
   });
 
   it("saves the default trip preference", async () => {
     const user = userEvent.setup();
     render(<SettingsView products={[butter]} stores={stores} />);
     expect(screen.getByRole("radio", { name: "Balance" })).toBeChecked();
-    await user.click(screen.getByText("Get home fastest"));
+    await user.click(screen.getByText("Fewest stops"));
     expect(readPreference("selectedPreference")).toBe("fastest");
   });
 

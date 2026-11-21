@@ -7,14 +7,14 @@ const storeNames = (plan: TripPlan, stores: readonly Store[]) =>
   plan.storeIds.map((id) => stores.find((s) => s.id === id)?.chain ?? id).join(" + ") || "No stops";
 
 /**
- * Puts three trips side by side: the cheapest trip with only one store, the quickest trip, and the recommended one,
- * so the shopper can see what the recommendation trades. Every number comes from the trip planner.
- * Example: "Cheapest single store: ALDI, $57.52, +4 min" vs. "Recommended: Walmart + ALDI, $51.23, +14 min".
+ * Puts three trips side by side: the cheapest trip with only one store, the trip with the fewest stops, and the
+ * recommended one, so the shopper can see what the recommendation trades. Every number comes from the trip planner.
+ * Example: "Cheapest single store: ALDI, $57.52" vs. "Recommended: Walmart + ALDI, $51.23".
  */
 export function PlanComparison({ result, stores }: { result: TripResult; stores: readonly Store[] }) {
   const columns: { title: string; plan: TripPlan | null; highlight?: boolean }[] = [
     { title: "Cheapest single store", plan: result.cheapestSingleStore },
-    { title: "Fastest", plan: result.fastest },
+    { title: "Fewest stops", plan: result.fastest },
     { title: "Recommended", plan: result.recommended, highlight: true },
   ];
   return (
@@ -38,8 +38,7 @@ export function PlanComparison({ result, stores }: { result: TripResult; stores:
         <tbody className="[&_td]:px-4 [&_td]:py-2 [&_th]:py-2 [&_tr]:border-t">
           {[
             { label: "Stops", value: (p: TripPlan) => storeNames(p, stores) },
-            { label: "Groceries + gas", value: (p: TripPlan) => <Money cents={p.checkoutTotalCents + p.gasCostCents} /> },
-            { label: "Extra time", value: (p: TripPlan) => <span className="tabular-nums">+{p.extraMinutes} min</span> },
+            { label: "Groceries", value: (p: TripPlan) => <Money cents={p.checkoutTotalCents} /> },
             { label: "Missing items", value: (p: TripPlan) => (p.missing.length === 0 ? "None" : `${p.missing.length}`) },
           ].map((row, i, rows) => (
             <tr key={row.label}>

@@ -5,7 +5,7 @@ test("landing page loads at 1440x900 with the hero, how it works, the numbers, t
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { level: 1, name: "Save on the drive you already make." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Pay less at the stores you already shop at." })).toBeVisible();
   await expect(page.getByRole("img", { name: /DSU to Home/ })).toBeVisible();
   // The landing page has its own layout, without the app's sidebar.
   await expect(page.getByRole("navigation", { name: "Main" })).toHaveCount(0);
@@ -52,7 +52,7 @@ test("regression: the demo login landed on a missing /plan page instead of the d
 test("settings sends visitors without the demo login back to the landing page", async ({ page }) => {
   await page.goto("/settings");
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Save on the drive you already make." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Pay less at the stores you already shop at." })).toBeVisible();
 });
 
 test("sidebar links to every page, and the current page is marked", async ({ page }) => {

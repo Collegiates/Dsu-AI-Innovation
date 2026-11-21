@@ -14,14 +14,15 @@ async function DashboardContent() {
 }
 
 /**
- * The Dashboard (/plan, demo login required): this week's savings, the recommended trip, and anything that needs attention.
+ * The Dashboard (/plan, demo login required): the stores you shop at, this week's savings, the recommended trip,
+ * and anything that needs attention.
  * It is where the demo login lands. The numbers load at request time; a skeleton shows meanwhile.
  */
 export default function DashboardPage() {
   return (
     <RequireDemo>
       <div className="space-y-6">
-        <PageHeader title="This week" description="Your weekly list, planned around the drive home." />
+        <PageHeader title="This week" description="Your weekly list, planned across the stores you pick." />
         <Suspense fallback={<DashboardSkeleton />}>
           <DashboardContent />
         </Suspense>

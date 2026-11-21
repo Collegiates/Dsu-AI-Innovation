@@ -8,7 +8,7 @@ export type RawCsvFiles = { storesCsv: string; productsCsv: string; auditCsv: st
 /**
  * Either the cleaned stores and products, or every problem found, each naming its file and row.
  * On failure, "validProducts" holds the product rows that passed, so the AI eval can still use real data
- * while a store detour is being measured. The app itself never uses a failed import.
+ * while a row is being fixed. The app itself never uses a failed import.
  */
 export type ImportResult =
   | { ok: true; stores: Store[]; products: Product[] }
@@ -35,6 +35,13 @@ const optionalNumber = z
   .refine((s) => !s || Number.isFinite(Number(s)), "is not a number")
   .transform((s) => (s ? Number(s) : undefined));
 
+// A detour cell: blank means "not measured" and is stored as null, never as 0.
+const nullableNumber = z
+  .string()
+  .optional()
+  .refine((s) => !s || Number.isFinite(Number(s)), "is not a number")
+  .transform((s) => (s ? Number(s) : null));
+
 const optionalText = z
   .string()
   .optional()
@@ -46,8 +53,8 @@ const StoreRowSchema = z.object({
   chain: z.string().min(1, "is blank"),
   address: z.string().min(1, "is blank"),
   on_route_label: z.string().min(1, "is blank"),
-  detour_minutes: requiredNumber.pipe(z.number().nonnegative("must be 0 or more")),
-  detour_miles: requiredNumber.pipe(z.number().nonnegative("must be 0 or more")),
+  detour_minutes: nullableNumber.pipe(z.number().nonnegative("must be 0 or more").nullable()),
+  detour_miles: nullableNumber.pipe(z.number().nonnegative("must be 0 or more").nullable()),
 });
 
 const ProductRowSchema = z.object({
@@ -105,7 +112,8 @@ const auditKey = (storeId: string, brand: string, name: string) =>
 /**
  * Checks every row of the three CSV files and turns them into clean store and product records.
  * It collects all problems instead of stopping at the first, so the data person can fix them in one pass.
- * Example: a store with a blank detour_minutes gives "stores.csv row 3: detour_minutes is blank (a blank is never treated as 0)".
+ * Example: a product with a blank price gives "products.csv row 3: price is blank (a blank is never treated as 0)".
+ * Blank store detours are allowed and stored as null (shoppers pick their stores; detours are optional).
  */
 export function importCatalog(files: RawCsvFiles): ImportResult {
   const errors: string[] = [];

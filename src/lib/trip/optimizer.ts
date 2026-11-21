@@ -144,9 +144,9 @@ function planFor(
   }
   if (combo.some((s) => byStore.get(s.id)!.length === 0)) return null;
 
-  // Stops are listed nearest-first (smallest detour), with the store id breaking ties.
+  // Stops are listed nearest-first when detours are known (unmeasured ones last), with the store id breaking ties.
   const stops = [...combo]
-    .sort((a, b) => a.detourMinutes - b.detourMinutes || a.id.localeCompare(b.id))
+    .sort((a, b) => (a.detourMinutes ?? Infinity) - (b.detourMinutes ?? Infinity) || a.id.localeCompare(b.id))
     .map((store) => {
       const items = byStore.get(store.id)!;
       return { store, items, subtotalCents: items.reduce((sum, i) => sum + i.checkoutCents, 0) };
@@ -164,11 +164,12 @@ function priceTrip(
   baselineGasCents: number,
 ): TripPlan {
   const checkoutTotalCents = stops.reduce((sum, s) => sum + s.subtotalCents, 0);
-  // Each detour was measured on its own against driving straight home, so they are added together.
-  const miles = stops.reduce((sum, s) => sum + s.store.detourMiles, 0);
+  // Measured detours add gas and driving minutes. An unmeasured (null) detour adds neither: the shopper picked
+  // that store, so only the extra-stop time below counts against it.
+  const miles = stops.reduce((sum, s) => sum + (s.store.detourMiles ?? 0), 0);
   const gasCostCents = toCents(miles * assumptions.gasCostPerMile);
   const extraMinutes =
-    stops.reduce((sum, s) => sum + s.store.detourMinutes, 0) + assumptions.minutesPerExtraStop * Math.max(0, stops.length - 1);
+    stops.reduce((sum, s) => sum + (s.store.detourMinutes ?? 0), 0) + assumptions.minutesPerExtraStop * Math.max(0, stops.length - 1);
   const timeCostCents = toCents(extraMinutes * assumptions.timeValuePerMinute[preference]);
 
   // Savings compare only the lines this plan actually buys, so a missing item never looks like a saving.
@@ -225,9 +226,10 @@ function compareFastest(a: TripPlan, b: TripPlan): number {
 
 /**
  * Plans the weekly grocery trip: which store(s) to stop at and what to buy at each.
- * It tries every group of 1 to 5 stores, buys each item where it is cheapest within that group, and scores each trip
- * as groceries + gas + the shopper's time (valued by their preference). Trips that get everything on the list win first.
- * Example: if Aldi saves $0.40 but adds a 10-minute stop, "balanced" keeps one stop; "maxSavings" may add Aldi.
+ * It tries every group of 1 to 5 of the shopper's chosen stores, buys each item where it is cheapest within that group,
+ * and scores each trip as groceries + gas (only for measured detours) + the shopper's time, where every store beyond
+ * the first costs a 10-minute stop valued by their preference. Trips that get everything on the list win first.
+ * Example: if ALDI saves $0.40 but is a second stop, "balanced" keeps one stop; "maxSavings" may add ALDI.
  */
 export function optimizeTrip(input: OptimizeInput): TripResult {
   const { basket, products, preference } = input;
@@ -252,7 +254,7 @@ export function optimizeTrip(input: OptimizeInput): TripResult {
   const baseline: Baseline = {
     storeId: usualStoreId,
     checkoutTotalCents: [...baselineByIndex.values()].reduce((a, b) => a + b, 0),
-    gasCostCents: usualStore ? toCents(usualStore.detourMiles * assumptions.gasCostPerMile) : 0,
+    gasCostCents: toCents((usualStore?.detourMiles ?? 0) * assumptions.gasCostPerMile),
     extraMinutes: usualStore?.detourMinutes ?? 0,
     missing: baselineMissing,
   };

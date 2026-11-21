@@ -8,8 +8,8 @@ import { DashboardView } from "./DashboardView";
 
 vi.mock("next/link", () => ({ default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => <a href={href} {...rest}>{children}</a> }));
 
-const walmart = { ...makeStore("walmart-dover", 0, 0), chain: "Walmart" };
-const aldi = { ...makeStore("aldi-dover", 4, 1), chain: "ALDI" };
+const walmart = { ...makeStore("walmart-dover", null, null), chain: "Walmart" };
+const aldi = { ...makeStore("aldi-dover", null, null), chain: "ALDI" };
 const products = [
   makeProduct("walmart-dover", "Coffee", 9.0, { groupKey: "coffee" }),
   makeProduct("aldi-dover", "Coffee", 5.0, { groupKey: "coffee" }),
@@ -21,30 +21,30 @@ function fixture(overrides: Partial<DashboardData> = {}): DashboardData {
     basket: [{ usualProductId: "walmart-dover--coffee" }, { usualProductId: "walmart-dover--milk" }],
     products,
     stores: [walmart, aldi],
-    // Time is free under maxSavings, so the $4 coffee saving is worth the 14-minute ALDI detour.
+    // Time is free under maxSavings, so the $4 coffee saving is worth the second stop.
     preference: "maxSavings",
   });
-  return { trip, stores: [walmart, aldi], itemCount: 2, unmatched: [], recall: null, recallCount: 0, deals: [], ...overrides };
+  return { trip, stores: [walmart, aldi], pricedStoreIds: ["walmart-dover", "aldi-dover"], itemCount: 2, unmatched: [], recall: null, recallCount: 0, deals: [], ...overrides };
 }
 
 describe("DashboardView", () => {
   it("shows savings computed by the optimizer, not hard-coded numbers", () => {
     render(<DashboardView data={fixture()} />);
-    // Typical $12.46 (coffee $9 + milk $3.46). Optimized: coffee at ALDI $5 + milk $3.46 + $0.15 gas = $8.61. Saves $3.85.
+    // Typical $12.46 (coffee $9 + milk $3.46). Optimized: coffee at ALDI $5 + milk $3.46 = $8.46, no gas. Saves $4.00.
     const hero = screen.getByRole("region", { name: /you save/i });
-    expect(within(hero).getByText("$3.85")).toBeInTheDocument();
+    expect(within(hero).getByText("$4.00")).toBeInTheDocument();
     expect(within(hero).getByText("$12.46")).toBeInTheDocument();
-    expect(within(hero).getByText("$8.61")).toBeInTheDocument();
-    expect(within(hero).getByText("31% less")).toBeInTheDocument();
+    expect(within(hero).getByText("$8.46")).toBeInTheDocument();
+    expect(within(hero).getByText("32% less")).toBeInTheDocument();
     expect(within(hero).getByRole("link", { name: /view trip plan/i })).toHaveAttribute("href", "/trip");
   });
 
-  it("shows the recommended stops with subtotals, extra time and gas", () => {
+  it("shows the recommended stores with subtotals, and no detour time or gas", () => {
     render(<DashboardView data={fixture()} />);
     const trip = screen.getByRole("region", { name: "Recommended trip" });
-    expect(within(trip).getByText("2 stops on the way home")).toBeInTheDocument();
-    expect(within(trip).getByText("+14 min")).toBeInTheDocument();
-    expect(within(trip).getByRole("img", { name: "Drive from DSU to Home. Stops: Walmart, ALDI." })).toBeInTheDocument();
+    expect(within(trip).getByText("2 stores")).toBeInTheDocument();
+    expect(within(trip).getByText("$5.00")).toBeInTheDocument();
+    expect(trip.textContent).not.toMatch(/\bmin\b|gas|detour|commute|on the way home/i);
   });
 
   it("shows calm empty states when there are no recalls or deals", () => {

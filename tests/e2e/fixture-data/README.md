@@ -1,1 +1,1 @@
-Test data for Playwright only (GROCERYSAVE_DATA_DIR). products.json = the real products from data/raw/. stores.json = the real stores with TEST detours, because the real detours have not been measured yet. Never used by the app itself.
+Test data for Playwright only (GROCERYSAVE_DATA_DIR). A copy of data/stores.json and data/products.json (the real stores and products, detours not measured, so null), kept separate so tests don't change when the live data is re-imported. Refresh with: cp data/stores.json data/products.json tests/e2e/fixture-data/

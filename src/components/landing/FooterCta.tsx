@@ -12,8 +12,8 @@ export function FooterCta() {
       <Reveal>
         <div className="flex items-center justify-between gap-10 rounded-3xl border bg-surface px-12 py-12">
           <div>
-            <h2 className="font-display text-4xl font-semibold tracking-tight">Your drive home, already planned.</h2>
-            <p className="mt-2 text-lg text-muted-foreground">See this week&apos;s cheapest stop in under a minute. No sign-up.</p>
+            <h2 className="font-display text-4xl font-semibold tracking-tight">Your grocery trip, already planned.</h2>
+            <p className="mt-2 text-lg text-muted-foreground">See this week&apos;s cheapest store in under a minute. No sign-up.</p>
           </div>
           <Button asChild size="lg" className="h-12 shrink-0 px-6 text-base">
             <Link href="/login">

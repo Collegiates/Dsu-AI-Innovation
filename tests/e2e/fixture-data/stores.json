@@ -1,6 +1,38 @@
 [
-  { "id": "walmart-dover", "name": "Walmart Supercenter #1736", "chain": "Walmart", "address": "36 Jerome Dr, Dover, DE 19901", "onRouteLabel": "TEST DETOUR (e2e only, not measured)", "detourMinutes": 0, "detourMiles": 0 },
-  { "id": "aldi-dover", "name": "ALDI Dover", "chain": "ALDI", "address": "10 N Dupont Hwy, Bldg 5, Dover, DE 19901", "onRouteLabel": "TEST DETOUR (e2e only, not measured)", "detourMinutes": 4, "detourMiles": 1.2 },
-  { "id": "foodlion-dover-forest", "name": "Food Lion - Forest Ave", "chain": "Food Lion", "address": "1030 Forest Ave, Dover, DE 19904", "onRouteLabel": "TEST DETOUR (e2e only, not measured)", "detourMinutes": 7, "detourMiles": 2.5 },
-  { "id": "target-dover", "name": "Target Dover #1312", "chain": "Target", "address": "148 John Hunn Brown Rd, Dover, DE 19901", "onRouteLabel": "TEST DETOUR (e2e only, not measured)", "detourMinutes": 6, "detourMiles": 2 }
+  {
+    "id": "walmart-dover",
+    "name": "Walmart Supercenter #1736",
+    "chain": "Walmart",
+    "address": "36 Jerome Dr, Dover, DE 19901",
+    "onRouteLabel": "NOT MEASURED - enter real route",
+    "detourMinutes": null,
+    "detourMiles": null
+  },
+  {
+    "id": "aldi-dover",
+    "name": "ALDI Dover",
+    "chain": "ALDI",
+    "address": "10 N Dupont Hwy, Bldg 5, Dover, DE 19901",
+    "onRouteLabel": "NOT MEASURED - enter real route",
+    "detourMinutes": null,
+    "detourMiles": null
+  },
+  {
+    "id": "foodlion-dover-forest",
+    "name": "Food Lion - Forest Ave",
+    "chain": "Food Lion",
+    "address": "1030 Forest Ave, Dover, DE 19904",
+    "onRouteLabel": "NOT MEASURED - prices not collected",
+    "detourMinutes": null,
+    "detourMiles": null
+  },
+  {
+    "id": "target-dover",
+    "name": "Target Dover #1312",
+    "chain": "Target",
+    "address": "148 John Hunn Brown Rd, Dover, DE 19901",
+    "onRouteLabel": "NOT MEASURED - prices not collected",
+    "detourMinutes": null,
+    "detourMiles": null
+  }
 ]

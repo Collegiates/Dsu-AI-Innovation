@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 /** The three trip preferences, in the order shown, with the words the shopper sees. */
 export const PREFERENCE_OPTIONS: { value: TripPreference; label: string; icon: typeof Gauge }[] = [
-  { value: "fastest", label: "Get home fastest", icon: Gauge },
+  { value: "fastest", label: "Fewest stops", icon: Gauge },
   { value: "balanced", label: "Balance", icon: Scale },
   { value: "maxSavings", label: "Maximize savings", icon: PiggyBank },
 ];
@@ -14,7 +14,7 @@ export const PREFERENCE_OPTIONS: { value: TripPreference; label: string; icon: t
 /**
  * A three-way switch for how the trip planner weighs time against money. It is built from real radio buttons,
  * so arrow keys and screen readers work as expected. Each option says what a minute of the shopper's time is worth.
- * Example: choosing "Maximize savings" values time at $0.00/min, so any detour that saves money is taken.
+ * Example: choosing "Maximize savings" values time at $0.00/min, so any extra store that saves money is added.
  */
 export function PreferencePicker({ value, onChange, name = "trip-preference" }: { value: TripPreference; onChange: (v: TripPreference) => void; name?: string }) {
   return (

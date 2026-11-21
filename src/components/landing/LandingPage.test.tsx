@@ -10,7 +10,7 @@ vi.mock("next/link", () => ({ default: ({ href, children, ...rest }: { href: str
 describe("landing page", () => {
   it("leads with the headline and sends every 'Try the demo' button to the demo login", () => {
     render(<LandingPage />);
-    expect(screen.getByRole("heading", { level: 1, name: "Save on the drive you already make." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Pay less at the stores you already shop at." })).toBeInTheDocument();
     const demoLinks = screen.getAllByRole("link", { name: /Try the demo/ });
     expect(demoLinks.length).toBeGreaterThanOrEqual(2);
     for (const link of demoLinks) expect(link).toHaveAttribute("href", "/login");
