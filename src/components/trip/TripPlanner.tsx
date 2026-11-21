@@ -2,7 +2,7 @@
 
 import { CircleAlert, ListChecks, ShieldAlert, ShoppingBasket, Store as StoreIcon } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useDeferredValue, useMemo, ViewTransition } from "react";
 import { DataSourceNote } from "@/components/shared/DataSourceNote";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
@@ -23,10 +23,14 @@ import { StopCard } from "./StopCard";
  * stores' totals beside it, the preference switch, one card per store (with "Cheaper swap" chips), the cost breakdown
  * and a comparison of trips. It re-plans instantly in the browser whenever the stores, preference or list change.
  * Example: with Walmart and ALDI picked, "Shop at ALDI: $41.20 · Walmart only: $52.10".
+ * Switching the preference is animated so the shopper can see which stores were added, dropped or moved.
  */
 export function TripPlanner({ products, stores }: { products: Product[]; stores: Store[] }) {
   const { value: entries, ready: listReady } = usePreference("list");
   const { value: preference, ready: prefReady, save: savePreference } = usePreference("selectedPreference");
+  // The whole page (switch included) follows one deferred update, a React transition, so the browser animates the
+  // switch, the store cards and the figures together in a single view transition instead of two staggered commits.
+  const plannedPreference = useDeferredValue(preference);
   const { value: selectedIds, ready: storesReady } = usePreference("selectedStores");
   const { value: hiddenBrands } = usePreference("hiddenBrands");
   const { value: hiddenProducts } = usePreference("hiddenProducts");
@@ -38,13 +42,13 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
     return stores.filter((s) => selectedIds.includes(s.id) && priced.has(s.id));
   }, [stores, products, selectedIds]);
   const result = useMemo(
-    () => optimizeTrip({ basket, products, stores: chosenStores, preference, usualStoreId: DEFAULT_USUAL_STORE_ID }),
-    [basket, products, chosenStores, preference],
+    () => optimizeTrip({ basket, products, stores: chosenStores, preference: plannedPreference, usualStoreId: DEFAULT_USUAL_STORE_ID }),
+    [basket, products, chosenStores, plannedPreference],
   );
   // Each picked store on its own, so the hero can compare "Shop at ALDI" with "Walmart only".
   const singleStore = useMemo(
-    () => chosenStores.map((store) => ({ store, plan: optimizeTrip({ basket, products, stores: [store], preference }).recommended })),
-    [basket, products, chosenStores, preference],
+    () => chosenStores.map((store) => ({ store, plan: optimizeTrip({ basket, products, stores: [store], preference: plannedPreference }).recommended })),
+    [basket, products, chosenStores, plannedPreference],
   );
   // Swaps at the picked stores, keyed by list line, for the "Cheaper swap" chips.
   const swapsByLine = useMemo(() => {
@@ -115,7 +119,10 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
           <h2 id="hero-title" className="font-display text-4xl font-semibold tracking-tight">
             {plan.stops.length > 0 ? (
               <>
-                Shop at {planNames}: <Money cents={plan.checkoutTotalCents} />
+                Shop at {planNames}:{" "}
+                <ViewTransition key={plan.checkoutTotalCents} name="trip-total-figure" share="figure-roll" default="none">
+                  <Money cents={plan.checkoutTotalCents} className="inline-block" />
+                </ViewTransition>
               </>
             ) : (
               "None of your stores sells these items"
@@ -124,7 +131,11 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
           <p className="mt-1 text-sm text-muted-foreground" aria-live="polite">
             {plan.savingsCents > 0 ? (
               <>
-                You save <Money cents={plan.savingsCents} className="font-semibold text-savings" /> vs. your usual products at your usual store.
+                You save{" "}
+                <ViewTransition key={plan.savingsCents} name="savings-figure" share="figure-roll" default="none">
+                  <Money cents={plan.savingsCents} className="inline-block font-semibold text-savings" />
+                </ViewTransition>{" "}
+                vs. your usual products at your usual store.
               </>
             ) : (
               "Your usual products are already the best value at these stores."
@@ -148,7 +159,9 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
         ) : null}
       </section>
 
-      <PreferencePicker value={preference} onChange={(v) => savePreference(v)} />
+      <div className="w-fit [view-transition-class:live-layer] [view-transition-name:trip-preference]">
+        <PreferencePicker value={plannedPreference} onChange={(v) => savePreference(v)} />
+      </div>
 
       <div className="grid grid-cols-12 items-start gap-6">
         <div className="col-span-5 space-y-6">
@@ -182,8 +195,8 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
             </dl>
             <p className="mt-3 text-xs text-muted-foreground">
               {extraStops > 0
-                ? `A second store only wins if it saves more than its extra stop is worth to you (${assumptions.minutesPerExtraStop} min at $${assumptions.timeValuePerMinute[preference].toFixed(2)}/min).`
-                : `One store: another store would need to save more than ${assumptions.minutesPerExtraStop} min of your time is worth ($${assumptions.timeValuePerMinute[preference].toFixed(2)}/min) to be added.`}
+                ? `A second store only wins if it saves more than its extra stop is worth to you (${assumptions.minutesPerExtraStop} min at $${assumptions.timeValuePerMinute[plannedPreference].toFixed(2)}/min).`
+                : `One store: another store would need to save more than ${assumptions.minutesPerExtraStop} min of your time is worth ($${assumptions.timeValuePerMinute[plannedPreference].toFixed(2)}/min) to be added.`}
             </p>
           </section>
         </div>
@@ -193,7 +206,9 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
             Stops
           </h2>
           {plan.stops.map((stop, i) => (
-            <StopCard key={stop.store.id} stop={stop} number={i + 1} productsById={productsById} swapsByLine={swapsByLine} />
+            <ViewTransition key={stop.store.id} name={`stop-${stop.store.id}`} update="stop-move" enter="stop-enter" exit="stop-exit" default="none">
+              <StopCard stop={stop} number={i + 1} productsById={productsById} swapsByLine={swapsByLine} />
+            </ViewTransition>
           ))}
           {plan.missing.length > 0 || unmatched.length > 0 ? (
             <div role="note" aria-label="Missing items" className="flex gap-3 rounded-2xl border border-dashed bg-surface p-5">

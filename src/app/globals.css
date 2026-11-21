@@ -98,9 +98,148 @@
   --sidebar-accent-foreground: #1e2a22;
   --sidebar-border: #e3ddcf;
   --sidebar-ring: #3e6b4e;
+
+  /* Motion: confident arrivals that settle (exponential ease-out); exits are quicker than entrances. */
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-leave: cubic-bezier(0.4, 0, 1, 1);
+  --dur-feedback: 140ms;
+  --dur-state: 240ms;
+  --dur-layout: 380ms;
+}
+
+/*
+ * Trip re-plan (the main demo moment). Switching "Fewest stops / Balance / Maximize savings" re-plans in one React
+ * transition, and the browser's View Transitions animate the difference: a store kept in both plans glides to its new
+ * slot, an added store rises in, a dropped store fades out, and the total and savings figures roll to their new values.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-state);
+}
+/*
+ * The preference switch has its own motion (the sliding pill), so it is lifted out of the page crossfade and shown
+ * live; otherwise its slide would ghost under a frozen snapshot of the old page.
+ */
+::view-transition-group(.live-layer),
+::view-transition-new(.live-layer) {
+  animation: none;
+}
+::view-transition-old(.live-layer),
+::view-transition-old(trip-preference) {
+  display: none;
+  opacity: 0;
+  animation: none;
+}
+::view-transition-group(.stop-move) {
+  animation-duration: var(--dur-layout);
+  animation-timing-function: var(--ease-settle);
+}
+::view-transition-old(.stop-move),
+::view-transition-new(.stop-move) {
+  animation-duration: var(--dur-state);
+}
+::view-transition-new(.stop-enter) {
+  animation: stop-rise var(--dur-layout) var(--ease-settle) both;
+}
+::view-transition-old(.stop-exit) {
+  animation: stop-sink 160ms var(--ease-leave) both;
+}
+::view-transition-image-pair(.figure-roll) {
+  overflow: clip;
+}
+::view-transition-group(.figure-roll) {
+  animation-duration: var(--dur-layout);
+  animation-timing-function: var(--ease-settle);
+}
+::view-transition-old(.figure-roll) {
+  animation: figure-out 200ms var(--ease-leave) both;
+}
+::view-transition-new(.figure-roll) {
+  animation: figure-in var(--dur-layout) var(--ease-settle) both;
+}
+
+@keyframes stop-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(2px);
+  }
+}
+@keyframes stop-sink {
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes figure-out {
+  to {
+    opacity: 0;
+    transform: translateY(-55%);
+  }
+}
+@keyframes figure-in {
+  from {
+    opacity: 0;
+    transform: translateY(55%);
+  }
+}
+
+/* My List: after "Match my list", the matched rows arrive top to bottom. Capped so the last row lands by ~0.5 s. */
+@keyframes row-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.motion-row {
+  animation: row-arrive var(--dur-state) var(--ease-settle) both;
+  animation-delay: calc(min(var(--i, 0), 10) * 28ms);
+}
+
+/*
+ * Reduced motion: nothing slides, rises or rolls, but changes still crossfade and colors still change,
+ * so it stays clear what the re-plan added, dropped or updated.
+ */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*) {
+    animation: none !important;
+  }
+  ::view-transition-new(.stop-enter),
+  ::view-transition-new(.figure-roll) {
+    animation: fade-in var(--dur-state) linear both;
+  }
+  ::view-transition-old(.stop-exit),
+  ::view-transition-old(.figure-roll) {
+    animation: fade-out 160ms linear both;
+  }
+  .motion-row {
+    animation-name: fade-in;
+    animation-delay: 0ms;
+  }
+  .motion-travel {
+    transition-property: opacity, color, background-color !important;
+  }
+  /* The pill jumps instead of sliding, so the label colors switch with it; a fade here leaves both labels unreadable. */
+  .motion-swap {
+    transition-duration: 0ms !important;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
 }
 
 @layer base {
+  /* Selected text uses the sage palette instead of the browser's blue. */
+  ::selection {
+    @apply bg-primary-soft text-foreground;
+  }
   * {
     @apply border-border outline-ring/50;
   }

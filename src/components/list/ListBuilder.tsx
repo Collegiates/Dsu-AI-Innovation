@@ -2,7 +2,7 @@
 
 import { ArrowRight, ListChecks, Minus, Plus, Sparkles, Tag } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { toast } from "sonner";
 import { ConfidenceBadge } from "@/components/shared/ConfidenceBadge";
 import { DataSourceNote } from "@/components/shared/DataSourceNote";
@@ -21,6 +21,7 @@ import { usePreference } from "@/lib/preferences/usePreference";
 import { formatSize, toCents } from "@/lib/pricing/money";
 import { effectivePrice } from "@/lib/pricing/price";
 import { DEFAULT_USUAL_STORE_ID } from "@/lib/trip/optimizer";
+import { cn } from "@/lib/utils";
 
 const HINTS: Partial<Record<ListEntry["label"], string>> = {
   Similar: "Close match. Check it's what you usually buy.",
@@ -36,6 +37,7 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
   const { value: entries, ready, save } = usePreference("list");
   const [draft, setDraft] = useState<string | null>(null);
   const [status, setStatus] = useState<{ kind: "idle" | "loading" } | { kind: "error"; message: string }>({ kind: "idle" });
+  const [justMatched, setJustMatched] = useState(false);
   const productsById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
   const chain = (storeId: string) => stores.find((s) => s.id === storeId)?.chain ?? storeId;
 
@@ -63,7 +65,15 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
     save((current) => entriesFromMatches(reply.data.results, DEFAULT_USUAL_STORE_ID, current));
     setDraft(null);
     setStatus({ kind: "idle" });
+    setJustMatched(true);
   }
+
+  // The fresh results arrive top to bottom once; later edits (quantities, removals) don't replay it.
+  useEffect(() => {
+    if (!justMatched) return;
+    const timer = setTimeout(() => setJustMatched(false), 900);
+    return () => clearTimeout(timer);
+  }, [justMatched]);
 
   function moveToDealWatch(index: number) {
     const entry = entries[index];
@@ -148,7 +158,11 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
               const product = entry.productId ? productsById.get(entry.productId) : undefined;
               const hint = HINTS[entry.label];
               return (
-                <li key={`${entry.text}-${index}`} className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-5 py-2.5">
+                <li
+                  key={`${entry.text}-${index}`}
+                  className={cn("grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-5 py-2.5", justMatched && "motion-row")}
+                  style={justMatched ? ({ "--i": index } as CSSProperties) : undefined}
+                >
                   <div className="min-w-0">
                     <p className="truncate font-medium">{product ? `${product.brand} ${product.name}` : `“${entry.text}”`}</p>
                     <p className="mt-0.5 flex items-center gap-1.5 overflow-hidden whitespace-nowrap text-xs text-muted-foreground">
