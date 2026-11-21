@@ -40,6 +40,14 @@ describe("keyword fallback", () => {
     expect(result.otherVariants.map((v) => v.product.id)).toEqual([vanillaYogurt.id]);
   });
 
+  it("regression: 'rice' matched Crispy Rice Cereal instead of rice", () => {
+    const cereal = makeProduct("aldi", "Crispy Rice Cereal", 2.15, { category: "breakfast", groupKey: "cereal-crispy-rice", variant: "crispy rice" });
+    const rice = makeProduct("walmart", "Long Grain Enriched White Rice", 1.82, { category: "pantry", groupKey: "rice-long-grain-white", variant: "dry long grain white rice" });
+    // "Rice" is what the rice product IS (the last word of its name); in the cereal it only describes the cereal.
+    expect(matchWithKeywords("rice", [cereal, rice]).groupKey).toBe("rice-long-grain-white");
+    expect(matchWithKeywords("crispy rice cereal", [cereal, rice]).groupKey).toBe("cereal-crispy-rice");
+  });
+
   it("answers 'No match' for something the store doesn't sell", () => {
     expect(matchWithKeywords("lawn mower", catalog).label).toBe("No match");
     expect(matchWithKeywords("   ", catalog).label).toBe("No match");

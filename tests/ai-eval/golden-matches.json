@@ -9,6 +9,7 @@
     { "input": "fresh chiken breast", "expected": "chicken-breast-fresh-lb", "note": "typo" },
     { "input": "frozen chicken", "expected": "chicken-breast-frozen" },
     { "input": "white rice 2lb", "expected": "rice-long-grain-white" },
+    { "input": "rice", "expected": "rice-long-grain-white", "note": "regression: used to match Crispy Rice Cereal" },
     { "input": "penne pasta", "expected": "pasta-penne-16oz" },
     { "input": "spagetti", "expected": "pasta-spaghetti-16oz", "note": "typo" },
     { "input": "honey nut cheerios", "expected": "cereal-oat-rings-honey", "note": "name brand not in catalog; store-brand equivalent expected" },

@@ -71,8 +71,9 @@ export const productText = (p: Product) => `${p.brand} ${p.name} ${p.variant} ${
 
 /**
  * Matches list text to products by comparing words, used when embeddings aren't available (no key, no saved data).
- * The score is the share of typed words found in the product (allowing small typos). Ties go to the product whose
- * name has the fewest extra words, i.e. the plainest version. Example: "eggs dozen" → "Grade A Large Eggs".
+ * The score is the share of typed words found in the product (allowing small typos). Ties go first to the product whose
+ * name ends with a typed word (what the product is, not a describing word), then to the plainest name.
+ * Example: "eggs dozen" → "Grade A Large Eggs"; "rice" → "Long Grain White Rice", not "Crispy Rice Cereal".
  */
 export function matchWithKeywords(input: string, catalog: readonly Product[]): MatchResult {
   const typed = tokens(input);
@@ -85,9 +86,14 @@ export function matchWithKeywords(input: string, catalog: readonly Product[]): M
     const coverage = perWord.reduce((a, b) => a + b, 0) / typed.length;
     const nameHits = nameWords.filter((w) => typed.some((t) => wordMatch(t, w) > 0)).length;
     const precision = nameWords.length > 0 ? nameHits / nameWords.length : 0;
-    return { product, score: coverage, precision, exact: perWord.every((s) => s >= 0.9) };
+    // The last word of a name usually says what the product is ("Crispy Rice Cereal" is a cereal, not rice).
+    const head = nameWords.at(-1);
+    const headHit = head !== undefined && typed.some((t) => wordMatch(t, head) > 0) ? 1 : 0;
+    return { product, score: coverage, headHit, precision, exact: perWord.every((s) => s >= 0.9) };
   });
-  scored.sort((a, b) => b.score - a.score || b.precision - a.precision || a.product.id.localeCompare(b.product.id));
+  scored.sort(
+    (a, b) => b.score - a.score || b.headHit - a.headHit || b.precision - a.precision || a.product.id.localeCompare(b.product.id),
+  );
 
   const top = scored[0];
   if (!top || top.score < aiConfig.keywordMatchThreshold) return noMatch(input, "keywords", top?.score ?? 0);
