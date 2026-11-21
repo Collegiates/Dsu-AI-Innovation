@@ -13,7 +13,6 @@ import { Money } from "@/components/shared/Money";
 import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/client";
 import { RECEIPT_NOTES, uploadReceipt } from "@/lib/receipt/client";
-import { DEMO_LIST } from "@/lib/config/demo";
 import type { Product, Store } from "@/lib/data/schema";
 import { entriesFromMatches, MAX_QUANTITY, parseListText, setQuantity, type ListEntry } from "@/lib/list/list";
 import type { MatchResult } from "@/lib/matching/core";
@@ -35,6 +34,7 @@ const HINTS: Partial<Record<ListEntry["label"], string>> = {
  */
 export function ListBuilder({ products, stores }: { products: Product[]; stores: Store[] }) {
   const { value: entries, ready, save } = usePreference("list");
+  const { value: usualList } = usePreference("usualList");
   const [draft, setDraft] = useState<string | null>(null);
   const [status, setStatus] = useState<{ kind: "idle" | "loading" | "reading" } | { kind: "error"; message: string }>({ kind: "idle" });
   const [receiptNote, setReceiptNote] = useState<string | null>(null);
@@ -69,8 +69,10 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
       return;
     }
     setReceiptNote(RECEIPT_NOTES[reply.data.source]);
-    setDraft(reply.data.items.join("\n"));
-    await matchItems(reply.data.items);
+    // When the receipt can't be read, plan the shopper's usual list (the page says so).
+    const items = reply.data.source === "demo-sample" ? usualList : reply.data.items;
+    setDraft(items.join("\n"));
+    await matchItems(items);
   }
 
   async function matchItems(items: string[]) {
@@ -120,7 +122,7 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
             <Sparkles aria-hidden />
             {status.kind === "loading" ? "Matching…" : "Match my list"}
           </Button>
-          <Button type="button" variant="outline" onClick={() => setDraft(DEMO_LIST.join("\n"))}>
+          <Button type="button" variant="outline" onClick={() => setDraft(usualList.join("\n"))}>
             Load my usual list
           </Button>
         </div>

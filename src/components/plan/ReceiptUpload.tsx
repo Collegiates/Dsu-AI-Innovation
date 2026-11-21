@@ -26,7 +26,9 @@ export function ReceiptUpload() {
     setState({ kind: "working" });
     const receipt = await uploadReceipt(file);
     if (!receipt.ok) return setState({ kind: "error", message: receipt.message });
-    const matched = await postJson<{ results: MatchResult[] }>("/api/match", { items: receipt.data.items });
+    // When the receipt can't be read, plan the shopper's usual list from Settings (the Trip Plan says so).
+    const items = receipt.data.source === "demo-sample" ? readPreference("usualList") : receipt.data.items;
+    const matched = await postJson<{ results: MatchResult[] }>("/api/match", { items });
     if (!matched.ok) return setState({ kind: "error", message: matched.message });
     writePreference("list", entriesFromMatches(matched.data.results, DEFAULT_USUAL_STORE_ID, readPreference("list")));
     try {

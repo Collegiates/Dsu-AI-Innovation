@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { TripPreference } from "@/lib/config/app";
 import { WaitlistItemSchema, type WaitlistItem } from "@/lib/deals/detectDeals";
+import { DEMO_LIST } from "@/lib/config/demo";
 import { ListEntrySchema, type ListEntry } from "@/lib/list/list";
 
 // Everything the app saves in the browser, with its allowed shape and its default. Nothing sensitive is stored here.
@@ -13,6 +14,8 @@ const SCHEMAS = {
   list: { schema: z.array(ListEntrySchema).max(100), fallback: [] as ListEntry[] },
   // The stores the shopper chose to shop at. Walmart and ALDI are the two with collected prices.
   selectedStores: { schema: z.array(short).max(20), fallback: ["walmart-dover", "aldi-dover"] as string[] },
+  // The shopper's usual weekly list, set up in Settings; "Load my usual list" and receipt uploads start from it.
+  usualList: { schema: z.array(z.string().trim().min(1).max(100)).max(100), fallback: [...DEMO_LIST] as string[] },
 } as const;
 
 /** The browser event fired after any setting is saved, so every open page updates at once. */
