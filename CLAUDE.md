@@ -2,6 +2,10 @@
 
 Claude Code reads this file at the start of every session. Follow it on every task.
 
+This project uses Next.js 16, which differs from older versions (for example, `cacheComponents` is on). Read these notes before writing Next.js code:
+
+@AGENTS.md
+
 ## What we are building
 
 A desktop web app that helps a household buy its weekly groceries for less **using stores already on their daily commute**.
