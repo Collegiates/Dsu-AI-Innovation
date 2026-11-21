@@ -8,7 +8,7 @@ import { Reveal } from "./Reveal";
 export const STATS = [
   { value: 32.6, decimals: 1, suffix: "%", label: "of income goes to food in the lowest-income households" },
   { value: 88, suffix: "%", label: "of grocery shoppers visit more than one store a month" },
-  { value: 219, prefix: "$", label: "a year Tasha saves with her swaps" },
+  { value: 219, prefix: "$", label: "a year James saves with swaps" },
 ] as const;
 
 export function StatsBand() {
@@ -37,7 +37,7 @@ export function StatsBand() {
         </dl>
         <p className="mt-12 max-w-4xl text-xs leading-5 text-primary-foreground/85">
           Sources: USDA Economic Research Service, Food Expenditure Series (2023, lowest income fifth of U.S. households). Axonify survey of 1,200+ U.S. and
-          Canadian grocery shoppers (August 2026). $219 is an illustrative yearly estimate for Tasha, the demo shopper, not a measured result.
+          Canadian grocery shoppers (August 2026). $219 is an illustrative yearly estimate for James, the demo shopper, not a measured result.
         </p>
       </div>
     </section>

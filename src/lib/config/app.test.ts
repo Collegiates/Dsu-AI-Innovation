@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { APP_NAME, assumptions } from "./app";
 
 describe("app config", () => {
-  it("names the app GrocerySave", () => {
-    expect(APP_NAME).toBe("GrocerySave");
+  it("names the app Reroute", () => {
+    expect(APP_NAME).toBe("Reroute");
   });
 
   it("uses the agreed trip assumptions", () => {

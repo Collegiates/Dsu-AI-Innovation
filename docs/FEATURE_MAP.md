@@ -131,7 +131,7 @@ Details for each feature follow.
 
 ## Landing page and demo login
 
-**What it does:** The public home page at `/`, shown without the app's sidebar: an animated hero drawing of the commute (DSU → Home, labeled "Illustration", with store badges; CSS-only and still when the visitor prefers reduced motion), "How it works", a numbers band (two published statistics with their sources printed underneath and one illustrative estimate that says so), a "Numbers you can check" trust section and a closing call to action. "Try the demo" goes to `/login`, where "Continue as Tasha (demo)" sets a demo flag in the browser and opens the Dashboard at `/plan`. The flag is a demo switch, not security: no accounts, no passwords, nothing personal stored. `/plan` and `/settings` send visitors without it back to `/`.
+**What it does:** The public home page at `/`, shown without the app's sidebar: an animated hero drawing of the commute (DSU → Home, labeled "Illustration", with store badges; CSS-only and still when the visitor prefers reduced motion), "How it works", a numbers band (two published statistics with their sources printed underneath and one illustrative estimate that says so), a "Numbers you can check" trust section and a closing call to action. "Try the demo" goes to `/login`, where "Continue as James (demo)" sets a demo flag in the browser and opens the Dashboard at `/plan`. The flag is a demo switch, not security: no accounts, no passwords, nothing personal stored. `/plan` and `/settings` send visitors without it back to `/`.
 
 **Pages:** `/` and `/login`
 

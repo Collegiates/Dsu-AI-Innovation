@@ -24,7 +24,7 @@ function notify() {
 
 /**
  * Says whether the demo login was used in this browser. Returns false when storage is blocked or unavailable.
- * Example: isDemoSignedIn() → true after "Continue as Tasha (demo)".
+ * Example: isDemoSignedIn() → true after "Continue as James (demo)".
  */
 export function isDemoSignedIn(storage: Storage | null = defaultStorage()): boolean {
   try {

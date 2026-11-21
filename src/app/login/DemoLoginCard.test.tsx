@@ -24,7 +24,7 @@ describe("demo login", () => {
   it("signs in as the demo shopper and goes to the plan", async () => {
     const user = userEvent.setup();
     render(<DemoLoginCard />);
-    await user.click(screen.getByRole("button", { name: "Continue as Tasha (demo)" }));
+    await user.click(screen.getByRole("button", { name: "Continue as James (demo)" }));
     expect(isDemoSignedIn()).toBe(true);
     expect(push).toHaveBeenCalledWith("/plan");
   });
@@ -35,7 +35,7 @@ describe("demo login", () => {
     });
     const user = userEvent.setup();
     render(<DemoLoginCard />);
-    await user.click(screen.getByRole("button", { name: "Continue as Tasha (demo)" }));
+    await user.click(screen.getByRole("button", { name: "Continue as James (demo)" }));
     expect(screen.getByRole("alert")).toHaveTextContent(/blocked saving/);
     expect(push).not.toHaveBeenCalled();
     setItem.mockRestore();

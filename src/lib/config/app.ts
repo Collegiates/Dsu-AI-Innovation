@@ -1,9 +1,9 @@
 /**
  * The product name shown in the browser tab, the sidebar and the page headings.
  * Change it here and the whole app follows, so a rename is a one-line edit.
- * Example: APP_NAME = "GrocerySave" makes the tab read "GrocerySave".
+ * Example: APP_NAME = "Reroute" makes the tab read "Reroute".
  */
-export const APP_NAME = "GrocerySave";
+export const APP_NAME = "Reroute";
 
 /**
  * The data-honesty line shown on the trip and list pages, so nobody mistakes online prices for checkout prices.

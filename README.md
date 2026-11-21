@@ -1,4 +1,4 @@
-# GrocerySave
+# Reroute
 
 Helps a household buy its weekly groceries for less **using stores already on their daily commute**.
 Type a grocery list; the app matches it to real products, plans which store(s) to stop at on the drive home,
@@ -25,7 +25,7 @@ npm run import-data
 npm run dev
 ```
 
-Open http://localhost:3000 at 1440×900, press **Try the demo**, then **Continue as Tasha (demo)**.
+Open http://localhost:3000 at 1440×900, press **Try the demo**, then **Continue as James (demo)**.
 
 - `npm run import-data` turns `data/raw/*.csv` into `data/stores.json` and `data/products.json`. It refuses blank store detours,
   so each store's detour must be measured and entered in `data/raw/stores.csv` first.
