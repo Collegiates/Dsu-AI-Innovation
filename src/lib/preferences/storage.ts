@@ -14,6 +14,11 @@ const SCHEMAS = {
   list: { schema: z.array(ListEntrySchema).max(100), fallback: [] as ListEntry[] },
   // The stores the shopper chose to shop at. Walmart and ALDI are the two with collected prices.
   selectedStores: { schema: z.array(short).max(20), fallback: ["walmart-dover", "aldi-dover"] as string[] },
+  // Stores the shopper added in Settings. They have no collected prices, so the planner skips them.
+  customStores: {
+    schema: z.array(z.object({ id: short, name: z.string().trim().min(1).max(100), address: z.string().trim().min(1).max(200) })).max(20),
+    fallback: [] as { id: string; name: string; address: string }[],
+  },
   // The shopper's usual weekly list, set up in Settings; "Load my usual list" and receipt uploads start from it.
   usualList: { schema: z.array(z.string().trim().min(1).max(100)).max(100), fallback: [...DEMO_LIST] as string[] },
 } as const;

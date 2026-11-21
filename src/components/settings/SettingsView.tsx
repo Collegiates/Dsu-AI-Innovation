@@ -4,6 +4,7 @@ import { EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, type ReactNode } from "react";
 import { StorePicker } from "@/components/plan/StorePicker";
+import { AddStoreForm } from "./AddStoreForm";
 import { UsualListEditor } from "./UsualListEditor";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ function HiddenList({ items, label, empty, onRemove }: { items: { key: string; n
 }
 
 /**
- * Settings: your usual weekly list, the stores you shop at (the same picker as the Dashboard),
+ * Settings: your usual weekly list, the stores you shop at (the same picker as the Dashboard), adding a store,
  * and the brands and products hidden from Smart Swaps, each with a button to show it again.
  * Example: removing "Equate" from hidden brands lets Equate swaps appear on Smart Swaps again.
  */
@@ -58,6 +59,7 @@ export function SettingsView({ products, stores }: { products: Product[]; stores
 
       <div className="space-y-6">
 
+        <AddStoreForm />
         <Section id="hidden-title" title="Hidden from Smart Swaps" description="Brands and products you chose never to see again.">
           {brandsReady && productsReady ? (
             <div className="space-y-5">

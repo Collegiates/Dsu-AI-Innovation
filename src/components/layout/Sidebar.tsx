@@ -11,7 +11,7 @@ import { activeNavItem, NAV_ITEMS } from "./nav";
 /** Clears this browser's session (sign-in, list, receipt, store picks) so the walkthrough can start over from the home page. */
 function resetDemo() {
   try {
-    for (const key of ["grocerysave:list", "grocerysave:selectedStores", "reroute:receipt-uploaded"]) localStorage.removeItem(key);
+    for (const key of ["grocerysave:list", "grocerysave:selectedStores", "grocerysave:customStores", "reroute:receipt-uploaded"]) localStorage.removeItem(key);
     sessionStorage.removeItem("reroute:receipt-note");
   } catch {
     // Storage blocked: nothing saved to clear.

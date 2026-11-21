@@ -9,11 +9,14 @@ import { cn } from "@/lib/utils";
  * Each store shows its name and address. Any store can be ticked; one with no collected prices yet says so,
  * and the Trip Plan skips it until its prices are added. Example: Walmart and ALDI are ticked by default; Food Lion says "No prices yet".
  */
-export function StorePicker({ stores, pricedStoreIds, columns = 4 }: { stores: Store[]; pricedStoreIds: string[]; columns?: 1 | 2 | 4 }) {
+export function StorePicker({ stores, pricedStoreIds, columns = 4 }: { stores: Pick<Store, "id" | "name" | "address">[]; pricedStoreIds: string[]; columns?: 1 | 2 | 4 }) {
   const { value: selected, ready, save } = usePreference("selectedStores");
+  const { value: custom } = usePreference("customStores");
   const priced = new Set(pricedStoreIds);
+  // Stores added in Settings are listed too; they have no prices yet.
+  const all = [...stores, ...custom.filter((c) => !stores.some((s) => s.id === c.id))];
   // Priced stores first, then by name, so the choices that work are on top.
-  const ordered = [...stores].sort((a, b) => Number(priced.has(b.id)) - Number(priced.has(a.id)) || a.name.localeCompare(b.name));
+  const ordered = [...all].sort((a, b) => Number(priced.has(b.id)) - Number(priced.has(a.id)) || a.name.localeCompare(b.name));
 
   const toggle = (id: string, checked: boolean) =>
     save((current) => (checked ? [...new Set([...current, id])] : current.filter((s) => s !== id)));
