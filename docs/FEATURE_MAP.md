@@ -101,10 +101,20 @@ For each feature: what it does, the page URL, the code files and the test files.
 
 ## Dashboard and app shell
 
-**What it does:** The home page shows exactly three blocks. (1) **Savings hero:** this week's optimized total vs. the typical total (usual products at the usual store, gas included), the savings in dollars and percent, and "View trip plan". (2) **Recommended trip:** a drawing of the commute (DSU → Home) with a pin per store, the chosen stop(s) with subtotals, extra minutes and gas. (3) **Needs your attention:** at most one possible recall and the top two Deal Watch items, each linking to its page. Every number comes from the real optimizer, recall matcher and Deal Watch code. The demo list is matched to the usual store's products by the matching code. The sidebar links to every page; the top bar shows the page title and the commute. Screenshot: `docs/screenshots/dashboard-1440x900.png` (e2e test data: real prices, test detours).
+**What it does:** The Dashboard (where the demo login lands) shows exactly three blocks. (1) **Savings hero:** this week's optimized total vs. the typical total (usual products at the usual store, gas included), the savings in dollars and percent, and "View trip plan". (2) **Recommended trip:** a drawing of the commute (DSU → Home) with a pin per store, the chosen stop(s) with subtotals, extra minutes and gas. (3) **Needs your attention:** at most one possible recall and the top two Deal Watch items, each linking to its page. Every number comes from the real optimizer, recall matcher and Deal Watch code. The demo list is matched to the usual store's products by the matching code. The sidebar links to every page; the top bar shows the page title and the commute. Screenshot: `docs/screenshots/dashboard-1440x900.png` (e2e test data: real prices, test detours).
 
-**Page:** `/`
+**Page:** `/plan` (demo login required; without it the visitor is sent to the landing page)
 
-**Code:** `src/app/page.tsx`, `src/lib/dashboard/data.ts`, `src/lib/trip/demoBasket.ts`, `src/components/dashboard/` (SavingsHero, TripCard, AttentionStrip, DashboardView, DashboardSkeleton), `src/components/layout/` (AppShell, Sidebar, TopBar, nav), `src/components/shared/` (PageHeader, StatCard, Money, ConfidenceBadge, EmptyState, ErrorState, LoadingSkeleton, DataSourceNote, CommuteLine, WithCatalog), design tokens in `src/app/globals.css`
+**Code:** `src/app/plan/page.tsx`, `src/lib/dashboard/data.ts`, `src/lib/trip/demoBasket.ts`, `src/components/dashboard/` (SavingsHero, TripCard, AttentionStrip, DashboardView, DashboardSkeleton), `src/components/layout/` (AppShell, Sidebar, TopBar, nav), `src/components/shared/` (PageHeader, StatCard, Money, ConfidenceBadge, EmptyState, ErrorState, LoadingSkeleton, DataSourceNote, CommuteLine, WithCatalog), design tokens in `src/app/globals.css`
 
-**Tests:** `src/components/dashboard/DashboardView.test.tsx`, `src/components/shared/Money.test.tsx`, `src/components/shared/ConfidenceBadge.test.tsx`, `tests/e2e/dashboard.spec.ts`, `tests/e2e/smoke.spec.ts`
+**Tests:** `src/components/dashboard/DashboardView.test.tsx`, `src/components/layout/nav.test.ts`, `src/components/shared/Money.test.tsx`, `src/components/shared/ConfidenceBadge.test.tsx`, `tests/e2e/dashboard.spec.ts`, `tests/e2e/smoke.spec.ts`
+
+## Landing page and demo login
+
+**What it does:** The public home page at `/`, shown without the app's sidebar: an animated hero drawing of the commute (DSU → Home, labeled "Illustration", with store badges; CSS-only and still when the visitor prefers reduced motion), "How it works", a numbers band (two published statistics with their sources printed underneath and one illustrative estimate that says so), a "Numbers you can check" trust section and a closing call to action. "Try the demo" goes to `/login`, where "Continue as Tasha (demo)" sets a demo flag in the browser and opens the Dashboard at `/plan`. The flag is a demo switch, not security: no accounts, no passwords, nothing personal stored. `/plan` and `/settings` send visitors without it back to `/`.
+
+**Pages:** `/` and `/login`
+
+**Code:** `src/app/page.tsx`, `src/components/landing/` (LandingPage, Hero, CommuteAnimation, HowItWorks, StatsBand, TrustSection, FooterCta, LandingHeader, CountUp, Reveal, storeLogos), `src/app/login/page.tsx`, `src/app/login/DemoLoginCard.tsx`, `src/lib/auth/demo.ts`, `src/lib/auth/RequireDemo.tsx`, `src/components/layout/AppShell.tsx` (hides the sidebar on `/` and `/login`)
+
+**Tests:** `src/components/landing/LandingPage.test.tsx`, `src/app/login/DemoLoginCard.test.tsx`, `src/lib/auth/demo.test.ts`, `src/lib/auth/RequireDemo.test.tsx`, `tests/e2e/landing.spec.ts`, `tests/e2e/dashboard.spec.ts`

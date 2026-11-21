@@ -15,7 +15,7 @@ export function Sidebar() {
   const active = activeNavItem(usePathname());
   return (
     <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6">
-      <Link href="/" className="flex items-center gap-2 px-2">
+      <Link href="/plan" className="flex items-center gap-2 px-2">
         <span className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">
           <Leaf aria-hidden className="size-4" />
         </span>

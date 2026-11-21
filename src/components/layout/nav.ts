@@ -5,7 +5,7 @@ export type NavItem = { href: string; label: string; icon: LucideIcon };
 
 /** The app's pages, in sidebar order. Each page title in the top bar comes from here. */
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/plan", label: "Dashboard", icon: LayoutDashboard },
   { href: "/list", label: "My List", icon: ListChecks },
   { href: "/trip", label: "Trip Plan", icon: Route },
   { href: "/swaps", label: "Smart Swaps", icon: ArrowLeftRight },
@@ -16,8 +16,8 @@ export const NAV_ITEMS: NavItem[] = [
 
 /**
  * Finds the nav item for the current address, so the sidebar can highlight it and the top bar can show its title.
- * Example: "/trip" → Trip Plan; "/" → Dashboard.
+ * Example: "/trip" → Trip Plan; "/plan" → Dashboard; "/" (the landing page) → none.
  */
 export function activeNavItem(pathname: string): NavItem | undefined {
-  return NAV_ITEMS.find((item) => (item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`)));
+  return NAV_ITEMS.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
 }

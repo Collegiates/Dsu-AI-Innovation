@@ -41,6 +41,14 @@ test("demo journey: landing → Try the demo → login → lands on /plan", asyn
   expect(await page.evaluate((key) => localStorage.getItem(key), DEMO_FLAG_KEY)).toBe("true");
 });
 
+test("regression: the demo login landed on a missing /plan page instead of the dashboard", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: "Continue as Tasha (demo)" }).click();
+  await expect(page).toHaveURL(/\/plan$/);
+  await expect(page.getByRole("heading", { level: 1, name: "This week" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");
+});
+
 test("settings sends visitors without the demo login back to the landing page", async ({ page }) => {
   await page.goto("/settings");
   await expect(page).toHaveURL(/\/$/);
