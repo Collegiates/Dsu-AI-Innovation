@@ -4,6 +4,7 @@ import { RECEIPT_UPLOADED_KEY } from "@/components/plan/AfterReceipt";
 import type { DashboardData } from "@/lib/dashboard/data";
 import { RECALL_LABEL, type RecallMatch } from "@/lib/recalls/match";
 import { optimizeTrip } from "@/lib/trip/optimizer";
+import { rankStores } from "@/lib/trip/rankStores";
 import { makeProduct, makeStore } from "@/lib/trip/test-fixtures";
 import { DashboardView } from "./DashboardView";
 
@@ -25,7 +26,8 @@ function fixture(overrides: Partial<DashboardData> = {}): DashboardData {
     // Time is free under maxSavings, so the $4 coffee saving is worth the second stop.
     preference: "maxSavings",
   });
-  return { trip, stores: [walmart, aldi], pricedStoreIds: ["walmart-dover", "aldi-dover"], itemCount: 2, unmatched: [], recall: null, recallCount: 0, deals: [], ...overrides };
+  const ranking = rankStores([{ usualProductId: "walmart-dover--coffee" }, { usualProductId: "walmart-dover--milk" }], products, [walmart, aldi]);
+  return { trip, ranking, stores: [walmart, aldi], pricedStoreIds: ["walmart-dover", "aldi-dover"], itemCount: 2, unmatched: [], recall: null, recallCount: 0, deals: [], ...overrides };
 }
 
 describe("DashboardView", () => {

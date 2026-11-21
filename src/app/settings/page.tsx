@@ -10,7 +10,7 @@ export default function SettingsPage() {
   return (
     <RequireDemo>
       <div className="space-y-6">
-        <PageHeader title="Settings" description="Your stores, your trip preference, and what you've hidden." />
+        <PageHeader title="Settings" description="Your stores and what you've hidden." />
         <Suspense fallback={<LoadingSkeleton className="h-96" />}>
           <WithCatalog>{({ products, stores }) => <SettingsView products={products} stores={stores} />}</WithCatalog>
         </Suspense>

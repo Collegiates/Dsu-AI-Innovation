@@ -9,10 +9,13 @@ import { matchRecalls, type RecallMatch } from "@/lib/recalls/match";
 import { fetchRecalls } from "@/lib/recalls/openfda";
 import { basketFromList } from "@/lib/trip/demoBasket";
 import { DEFAULT_USUAL_STORE_ID, optimizeTrip, type TripResult } from "@/lib/trip/optimizer";
+import { rankStores, type StoreRanking } from "@/lib/trip/rankStores";
 
 /** Everything the Dashboard shows, all computed by code from the real data files. */
 export type DashboardData = {
   trip: TripResult;
+  /** The one store to shop at this week, and every store's whole-list total. */
+  ranking: StoreRanking;
   stores: Store[];
   /** Stores that have collected prices; the others are shown as "Prices coming soon". */
   pricedStoreIds: string[];
@@ -37,9 +40,11 @@ export async function getDashboardData(preference: TripPreference = "balanced"):
   const { products, stores, productsById } = loaded.catalog;
   const { basket, unmatched } = basketFromList(DEMO_WEEKLY_LIST, products, DEFAULT_USUAL_STORE_ID);
   const trip = optimizeTrip({ basket, products, stores, preference, usualStoreId: DEFAULT_USUAL_STORE_ID });
+  // One trip a week to one store: the winner is the store with the most of the list at the lowest total.
+  const ranking = rankStores(basket, products, stores);
 
   // Check what the shopper will actually buy, plus their usual products.
-  const checked = new Map(trip.recommended.stops.flatMap((s) => s.items.map((i) => [i.product.id, i.product] as const)));
+  const checked = new Map((ranking.winner?.plan.stops ?? []).flatMap((s) => s.items.map((i) => [i.product.id, i.product] as const)));
   for (const item of basket) {
     const p = productsById.get(item.usualProductId);
     if (p) checked.set(p.id, p);
@@ -52,6 +57,6 @@ export async function getDashboardData(preference: TripPreference = "balanced"):
 
   return {
     ok: true,
-    data: { trip, stores, pricedStoreIds: [...new Set(products.map((p) => p.storeId))], itemCount: basket.length, unmatched, recall: recallMatches[0] ?? null, recallCount: recallMatches.length, deals },
+    data: { trip, ranking, stores, pricedStoreIds: [...new Set(products.map((p) => p.storeId))], itemCount: basket.length, unmatched, recall: recallMatches[0] ?? null, recallCount: recallMatches.length, deals },
   };
 }

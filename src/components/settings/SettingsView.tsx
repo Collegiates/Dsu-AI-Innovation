@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useMemo, type ReactNode } from "react";
 import { StorePicker } from "@/components/plan/StorePicker";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
-import { PreferencePicker } from "@/components/shared/PreferencePicker";
 import { Button } from "@/components/ui/button";
 import type { Product, Store } from "@/lib/data/schema";
 import { usePreference } from "@/lib/preferences/usePreference";
@@ -39,12 +38,11 @@ function HiddenList({ items, label, empty, onRemove }: { items: { key: string; n
 }
 
 /**
- * Settings: the stores you shop at (the same picker as the Dashboard), the default trip preference,
+ * Settings: the stores you shop at (the same picker as the Dashboard),
  * and the brands and products hidden from Smart Swaps, each with a button to show it again.
  * Example: removing "Equate" from hidden brands lets Equate swaps appear on Smart Swaps again.
  */
 export function SettingsView({ products, stores }: { products: Product[]; stores: Store[] }) {
-  const { value: preference, ready: prefReady, save: savePreference } = usePreference("selectedPreference");
   const { value: hiddenBrands, ready: brandsReady, save: saveBrands } = usePreference("hiddenBrands");
   const { value: hiddenProducts, ready: productsReady, save: saveProducts } = usePreference("hiddenProducts");
   const productsById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
@@ -57,9 +55,6 @@ export function SettingsView({ products, stores }: { products: Product[]; stores
       </div>
 
       <div className="space-y-6">
-        <Section id="preference-title" title="Default trip preference" description="How the Trip Plan weighs your time against money. You can change it on the Trip Plan too.">
-          {prefReady ? <PreferencePicker name="default-preference" value={preference} onChange={(v) => savePreference(v)} /> : <LoadingSkeleton className="h-11 w-96" />}
-        </Section>
 
         <Section id="hidden-title" title="Hidden from Smart Swaps" description="Brands and products you chose never to see again.">
           {brandsReady && productsReady ? (

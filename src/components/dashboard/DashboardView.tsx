@@ -15,13 +15,13 @@ export function DashboardView({ data }: { data: DashboardData }) {
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-7">
           <AfterReceipt>
-            <SavingsHero trip={data.trip} itemCount={data.itemCount} />
+            <SavingsHero ranking={data.ranking} itemCount={data.itemCount} />
           </AfterReceipt>
         </div>
         <div className="col-span-5 flex flex-col gap-4">
           <StorePicker stores={data.stores} pricedStoreIds={data.pricedStoreIds} columns={1} />
           <AfterReceipt fallbackHidden>
-            <TripCard trip={data.trip} />
+            <TripCard ranking={data.ranking} />
           </AfterReceipt>
         </div>
       </div>

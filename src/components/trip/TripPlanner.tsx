@@ -1,21 +1,19 @@
 "use client";
 
-import { ArrowRight, CircleAlert, ListChecks, Receipt, ShieldAlert, ShoppingBasket, Store as StoreIcon, Trophy } from "lucide-react";
+import { ArrowRight, CircleAlert, ListChecks, Receipt, ShieldAlert, Store as StoreIcon, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useSyncExternalStore } from "react";
 import { DataSourceNote } from "@/components/shared/DataSourceNote";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Money } from "@/components/shared/Money";
-import { PreferencePicker } from "@/components/shared/PreferencePicker";
 import { Button } from "@/components/ui/button";
-import { assumptions } from "@/lib/config/app";
 import type { Product, Store } from "@/lib/data/schema";
 import { basketFromEntries } from "@/lib/list/list";
 import { usePreference } from "@/lib/preferences/usePreference";
 import { findSwaps, type Swap } from "@/lib/swaps/findSwaps";
-import { DEFAULT_USUAL_STORE_ID, optimizeTrip } from "@/lib/trip/optimizer";
-import { PlanComparison } from "./PlanComparison";
+import { rankStores } from "@/lib/trip/rankStores";
+import { cn } from "@/lib/utils";
 import { SavingsOverview } from "./SavingsOverview";
 import { StopCard } from "./StopCard";
 
@@ -31,15 +29,13 @@ function readReceiptNote(): string | null {
 }
 
 /**
- * The Trip Plan page's content, using only the stores the shopper picked: a "Shop at ALDI: $X" line with the other
- * stores' totals beside it, the preference switch, one card per store with its full grocery list (and "Cheaper swap"
- * chips), an "Overview" popup listing exactly the discounted items, the cost breakdown
- * and a comparison of trips. It re-plans instantly in the browser whenever the stores, preference or list change.
- * Example: with Walmart and ALDI picked, "Shop at ALDI: $41.20 · Walmart only: $52.10".
+ * The Trip Plan page: one trip a week, to one store. Every store the shopper picked is priced on the whole list, the
+ * best one is named the winner ("Shop at ALDI: $57.34"), the other stores' totals are shown beside it, and the full
+ * grocery list for the winner follows, with "Cheaper swap" chips and an "Overview" popup of the discounted items.
+ * Example: with Walmart and ALDI picked, ALDI wins because it sells all 12 items for $57.34.
  */
 export function TripPlanner({ products, stores }: { products: Product[]; stores: Store[] }) {
   const { value: entries, ready: listReady } = usePreference("list");
-  const { value: preference, ready: prefReady, save: savePreference } = usePreference("selectedPreference");
   const { value: selectedIds, ready: storesReady } = usePreference("selectedStores");
   const { value: hiddenBrands } = usePreference("hiddenBrands");
   const { value: hiddenProducts } = usePreference("hiddenProducts");
@@ -51,25 +47,17 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
     const priced = new Set(products.map((p) => p.storeId));
     return stores.filter((s) => selectedIds.includes(s.id) && priced.has(s.id));
   }, [stores, products, selectedIds]);
-  const result = useMemo(
-    () => optimizeTrip({ basket, products, stores: chosenStores, preference, usualStoreId: DEFAULT_USUAL_STORE_ID }),
-    [basket, products, chosenStores, preference],
-  );
-  // Each picked store on its own, so the hero can compare "Shop at ALDI" with "Walmart only".
-  const singleStore = useMemo(
-    () => chosenStores.map((store) => ({ store, plan: optimizeTrip({ basket, products, stores: [store], preference }).recommended })),
-    [basket, products, chosenStores, preference],
-  );
-  // Swaps at the picked stores, keyed by list line, for the "Cheaper swap" chips.
+  const ranking = useMemo(() => rankStores(basket, products, chosenStores), [basket, products, chosenStores]);
+  // Swaps at the winning store, keyed by list line, for the "Cheaper swap" chips.
   const swapsByLine = useMemo(() => {
-    const chosenIds = new Set(chosenStores.map((s) => s.id));
-    const swaps = findSwaps({ basket, products: products.filter((p) => chosenIds.has(p.storeId) || basket.some((b) => b.usualProductId === p.id)), hiddenBrands, hiddenProducts });
-    return new Map<number, Swap>(swaps.filter((s) => chosenIds.has(s.to.storeId)).map((s) => [s.basketIndex, s]));
-  }, [basket, products, chosenStores, hiddenBrands, hiddenProducts]);
+    const winnerId = ranking.winner?.store.id;
+    const swaps = findSwaps({ basket, products, hiddenBrands, hiddenProducts });
+    return new Map<number, Swap>(swaps.filter((s) => s.to.storeId === winnerId).map((s) => [s.basketIndex, s]));
+  }, [basket, products, ranking, hiddenBrands, hiddenProducts]);
 
-  if (!listReady || !prefReady || !storesReady) {
+  if (!listReady || !storesReady) {
     return (
-      <div aria-busy="true" aria-label="Planning your trip" className="grid grid-cols-12 gap-6">
+      <div aria-busy="true" aria-label="Finding your best store" className="grid grid-cols-12 gap-6">
         <LoadingSkeleton className="col-span-5 h-96" />
         <LoadingSkeleton className="col-span-7 h-96" />
       </div>
@@ -80,7 +68,7 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
       <EmptyState
         icon={ListChecks}
         title="Nothing to plan yet"
-        description="Add your weekly items on My List, then come back to see where to shop."
+        description="Upload a receipt or add your weekly items on My List, then come back to see your best store."
         action={
           <Button asChild>
             <Link href="/list">Go to My List</Link>
@@ -94,7 +82,7 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
       <EmptyState
         icon={StoreIcon}
         title="Pick at least one store"
-        description="Choose the stores you shop at, and the plan will compare them."
+        description="Choose the stores you shop at, and we'll find the best one for your list."
         action={
           <Button asChild>
             <Link href="/plan">Choose stores</Link>
@@ -104,14 +92,10 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
     );
   }
 
-  const plan = result.recommended;
-  const usualTotal = plan.checkoutTotalCents + plan.savingsCents;
-  const planNames = plan.stops.map((s) => s.store.chain).join(" + ");
-  // Picked stores without collected prices: said plainly, never priced at $0.
+  const { winner, quotes, savings } = ranking;
+  const stop = winner?.plan.stops[0];
   const pricedIds = new Set(products.map((p) => p.storeId));
   const unpricedPicked = stores.filter((s) => selectedIds.includes(s.id) && !pricedIds.has(s.id));
-  const others = singleStore.filter((o) => !(plan.storeIds.length === 1 && plan.storeIds[0] === o.store.id));
-  const extraStops = Math.max(0, plan.stops.length - 1);
 
   return (
     <div className="space-y-6">
@@ -136,28 +120,30 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
 
       <section aria-labelledby="hero-title" className="flex items-end justify-between gap-6 rounded-2xl border bg-surface p-6">
         <div>
-          {plan.stops.length > 0 ? (
+          {winner ? (
             <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-primary">
-              <Trophy aria-hidden className="size-4" /> Winner this week
+              <Trophy aria-hidden className="size-4" /> Best store this week
             </p>
           ) : null}
           <h2 id="hero-title" className="font-display text-4xl font-semibold tracking-tight">
-            {plan.stops.length > 0 ? (
+            {winner ? (
               <>
-                Shop at {planNames}: <Money cents={plan.checkoutTotalCents} />
+                Shop at {winner.store.chain}: <Money cents={winner.totalCents} />
               </>
             ) : (
               "None of your stores sells these items"
             )}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground" aria-live="polite">
-            {plan.savingsCents > 0 ? (
+            {winner && savings && savings.sharedItems > 0 && savings.savingsCents > 0 ? (
               <>
-                You save <Money cents={plan.savingsCents} className="font-semibold text-savings" /> vs. your usual products at your usual store.
+                You save <Money cents={savings.savingsCents} className="font-semibold text-savings" /> vs. {savings.versus.chain} on the {savings.sharedItems}{" "}
+                item{savings.sharedItems === 1 ? "" : "s"} both stores sell
+                {winner.missing === 0 ? ", and it has your whole list" : ""}.
               </>
-            ) : (
-              "Your usual products are already the best value at these stores."
-            )}
+            ) : winner ? (
+              `One trip, one store${winner.missing === 0 ? ": everything on your list is here" : ""}.`
+            ) : null}
           </p>
           <Button asChild className="mt-4">
             <Link href="/list">
@@ -165,86 +151,48 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
             </Link>
           </Button>
         </div>
-        {others.length > 0 ? (
-          <ul aria-label="Other stores" className="space-y-1 text-right text-sm">
-            {others.map(({ store, plan: alone }) => (
-              <li key={store.id}>
-                <span className="text-muted-foreground">{store.chain} only: </span>
-                {alone.stops.length > 0 ? <Money cents={alone.checkoutTotalCents} className="font-semibold" /> : <span>sells none of these</span>}
-                {alone.stops.length > 0 && alone.missing.length > 0 ? (
-                  <span className="block text-xs text-muted-foreground">
-                    {alone.missing.length} item{alone.missing.length > 1 ? "s" : ""} not sold there
+        <ul aria-label="Store totals" className="min-w-64 space-y-1.5 text-sm">
+          {quotes.map((q) => (
+            <li key={q.store.id} className={cn("flex items-baseline justify-between gap-6 rounded-md px-2 py-1", q === winner && "bg-primary-soft font-semibold")}>
+              <span>{q.store.chain}</span>
+              <span className="text-right">
+                <Money cents={q.totalCents} />
+                {q.missing > 0 ? (
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {q.missing} item{q.missing > 1 ? "s" : ""} not sold there
                   </span>
                 ) : null}
-              </li>
-            ))}
-          </ul>
-        ) : null}
+              </span>
+            </li>
+          ))}
+          {unpricedPicked.map((s) => (
+            <li key={s.id} className="flex justify-between gap-6 px-2 py-1 text-muted-foreground">
+              <span>{s.chain}</span>
+              <span>No prices yet</span>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      <div className="flex items-center justify-between gap-6">
-        <PreferencePicker value={preference} onChange={(v) => savePreference(v)} />
-        {unpricedPicked.length > 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No prices yet for {unpricedPicked.map((s) => s.chain).join(" and ")}, so {unpricedPicked.length > 1 ? "they're" : "it's"} not in this plan.
-          </p>
-        ) : null}
-      </div>
-
-      <div className="grid grid-cols-12 items-start gap-6">
-        <div className="col-span-5 space-y-6">
-          <section aria-labelledby="cost-title" className="rounded-2xl border bg-surface p-6">
-            <h2 id="cost-title" className="font-display text-xl font-semibold">
-              Cost breakdown
-            </h2>
-            <dl className="mt-3 space-y-2 text-sm [&>div]:flex [&>div]:items-baseline [&>div]:justify-between">
-              {plan.stops.map((stop) => (
-                <div key={stop.store.id}>
-                  <dt className="flex items-center gap-2 text-muted-foreground">
-                    <ShoppingBasket aria-hidden className="size-4" /> {stop.store.chain}
-                  </dt>
-                  <dd>
-                    <Money cents={stop.subtotalCents} />
-                  </dd>
-                </div>
-              ))}
-              <div className="border-t pt-2 font-semibold">
-                <dt>Groceries total</dt>
-                <dd>
-                  <Money cents={plan.checkoutTotalCents} />
-                </dd>
-              </div>
-              <div className="text-muted-foreground">
-                <dt>Usual products at your usual store</dt>
-                <dd>
-                  <Money cents={usualTotal} />
-                </dd>
-              </div>
-            </dl>
-            <p className="mt-3 text-xs text-muted-foreground">
-              {extraStops > 0
-                ? `A second store only wins if it saves more than its extra stop is worth to you (${assumptions.minutesPerExtraStop} min at $${assumptions.timeValuePerMinute[preference].toFixed(2)}/min).`
-                : `One store: another store would need to save more than ${assumptions.minutesPerExtraStop} min of your time is worth ($${assumptions.timeValuePerMinute[preference].toFixed(2)}/min) to be added.`}
-            </p>
-          </section>
-        </div>
-
-        <section aria-labelledby="stops-title" className="col-span-7 space-y-4">
+      {stop ? (
+        <section aria-labelledby="stops-title" className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 id="stops-title" className="font-display text-xl font-semibold">
-              Your grocery list, by store
+              Your grocery list at {stop.store.chain}
             </h2>
-            <SavingsOverview plan={plan} basket={basket} productsById={productsById} />
+            <SavingsOverview plan={winner!.plan} basket={basket} productsById={productsById} />
           </div>
-          {plan.stops.map((stop, i) => (
-            <StopCard key={stop.store.id} stop={stop} number={i + 1} productsById={productsById} swapsByLine={swapsByLine} />
-          ))}
-          {plan.missing.length > 0 || unmatched.length > 0 ? (
+          <StopCard stop={stop} number={1} productsById={productsById} swapsByLine={swapsByLine} />
+          {winner!.plan.missing.length > 0 || unmatched.length > 0 ? (
             <div role="note" aria-label="Missing items" className="flex gap-3 rounded-2xl border border-dashed bg-surface p-5">
               <CircleAlert aria-hidden className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
               <div className="space-y-1 text-sm">
-                <p className="font-medium">Not included in this trip&apos;s total</p>
-                {plan.missing.length > 0 ? <p className="text-muted-foreground">None of your stores sells: {plan.missing.map((m) => m.label).join(", ")}.</p> : null}
+                <p className="font-medium">Not included in this total</p>
+                {winner!.plan.missing.length > 0 ? (
+                  <p className="text-muted-foreground">
+                    {stop.store.chain} doesn&apos;t sell: {winner!.plan.missing.map((m) => m.label).join(", ")}.
+                  </p>
+                ) : null}
                 {unmatched.length > 0 ? (
                   <p className="text-muted-foreground">
                     Not matched on My List: {unmatched.map((t) => `“${t}”`).join(", ")}.{" "}
@@ -257,9 +205,8 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
             </div>
           ) : null}
         </section>
-      </div>
+      ) : null}
 
-      <PlanComparison result={result} stores={chosenStores} />
       <DataSourceNote />
     </div>
   );

@@ -1,89 +1,70 @@
-import { ArrowRight, PiggyBank } from "lucide-react";
+import { ArrowRight, Trophy } from "lucide-react";
 import Link from "next/link";
 import { DataSourceNote } from "@/components/shared/DataSourceNote";
 import { Money } from "@/components/shared/Money";
 import { Button } from "@/components/ui/button";
-import { assumptions } from "@/lib/config/app";
-import type { TripResult } from "@/lib/trip/optimizer";
-
-const PREFERENCE_NAMES = { fastest: "Fastest", balanced: "Balanced", maxSavings: "Max savings" } as const;
+import type { StoreRanking } from "@/lib/trip/rankStores";
 
 /**
- * The Dashboard's main block: what this week's list costs with the recommended trip versus the usual trip,
- * and how much that saves in dollars and percent. "Typical" means the usual products at the usual store.
- * Example: "You save $6.42 (14%) — $39.10 instead of $45.52".
+ * The Dashboard's main block: this week's best single store for the whole list, what it saves against the
+ * runner-up (on the items both sell), and every store's total as a bar. All numbers are computed by code.
+ * Example: "Shop at ALDI: $57.34 · You save $1.20 vs. Walmart on the 4 items both stores sell".
  */
-export function SavingsHero({ trip, itemCount }: { trip: TripResult; itemCount: number }) {
-  const plan = trip.recommended;
-  const optimized = plan.checkoutTotalCents + plan.gasCostCents;
-  const typical = optimized + plan.savingsCents;
-  const percent = typical > 0 ? Math.round((plan.savingsCents / typical) * 100) : 0;
-  const saves = plan.savingsCents > 0;
-  const width = (cents: number) => `${typical > 0 ? Math.max(8, Math.min(100, (cents / Math.max(typical, optimized)) * 100)) : 0}%`;
+export function SavingsHero({ ranking, itemCount }: { ranking: StoreRanking; itemCount: number }) {
+  const { winner, quotes, savings } = ranking;
+  const max = Math.max(1, ...quotes.map((q) => q.totalCents));
 
   return (
     <section aria-labelledby="savings-title" className="flex h-full flex-col rounded-2xl border bg-surface p-7">
-      <div className="flex items-center justify-between">
-        <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <PiggyBank aria-hidden className="size-4 text-savings" />
-          {itemCount} items on your list
-        </p>
-        <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
-          {PREFERENCE_NAMES[trip.preference]} plan · time at ${assumptions.timeValuePerMinute[trip.preference].toFixed(2)}/min
-        </span>
-      </div>
+      <p className="flex items-center gap-2 text-sm font-medium text-primary">
+        <Trophy aria-hidden className="size-4" />
+        Best store this week · {itemCount} items on your list
+      </p>
 
-      <h2 id="savings-title" className="mt-5 font-display text-5xl font-semibold tracking-tight">
-        {saves ? (
+      <h2 id="savings-title" className="mt-4 font-display text-5xl font-semibold tracking-tight">
+        {winner ? (
           <>
-            You save <Money cents={plan.savingsCents} className="text-savings" />
+            Shop at {winner.store.chain}: <Money cents={winner.totalCents} />
           </>
         ) : (
-          "Your usual trip is the best value"
+          "None of your stores sells these items"
         )}
       </h2>
       <p className="mt-2 text-lg text-muted-foreground">
-        {saves ? (
+        {winner && savings && savings.sharedItems > 0 && savings.savingsCents > 0 ? (
           <>
-            <span className="font-semibold text-savings">{percent}% less</span> than your usual trip.
+            You save <Money cents={savings.savingsCents} className="font-semibold text-savings" /> vs. {savings.versus.chain} on the {savings.sharedItems} items
+            both stores sell.
           </>
         ) : (
-          "No other store saves enough to be worth a second stop this week."
+          "One trip, one store, the whole list."
         )}
       </p>
 
       <dl className="mt-7 space-y-3">
-        <div>
-          <div className="flex items-baseline justify-between text-sm">
-            <dt className="text-muted-foreground">Typical (usual products, usual store)</dt>
-            <dd className="font-medium"><Money cents={typical} /></dd>
+        {quotes.map((q) => (
+          <div key={q.store.id}>
+            <div className="flex items-baseline justify-between text-sm">
+              <dt className={q === winner ? "font-semibold" : "text-muted-foreground"}>
+                {q.store.chain}
+                {q.missing > 0 ? <span className="font-normal text-muted-foreground"> · {q.missing} items not sold there</span> : null}
+              </dt>
+              <dd className="font-medium">
+                <Money cents={q.totalCents} />
+              </dd>
+            </div>
+            <div className="mt-1.5 h-2.5 rounded-full bg-muted">
+              <div className={q === winner ? "h-full rounded-full bg-primary" : "h-full rounded-full bg-chart-3"} style={{ width: `${Math.max(8, (q.totalCents / max) * 100)}%` }} />
+            </div>
           </div>
-          <div className="mt-1.5 h-2.5 rounded-full bg-muted">
-            <div className="h-full rounded-full bg-chart-3" style={{ width: width(typical) }} />
-          </div>
-        </div>
-        <div>
-          <div className="flex items-baseline justify-between text-sm">
-            <dt className="text-muted-foreground">Optimized trip</dt>
-            <dd className="font-semibold"><Money cents={optimized} /></dd>
-          </div>
-          <div className="mt-1.5 h-2.5 rounded-full bg-muted">
-            <div className="h-full rounded-full bg-primary" style={{ width: width(optimized) }} />
-          </div>
-        </div>
+        ))}
       </dl>
-
-      {plan.missing.length > 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">
-          Not found at these stores: {plan.missing.map((m) => m.label).join(", ")}. Totals leave them out.
-        </p>
-      ) : null}
 
       <div className="mt-auto flex items-end justify-between gap-4 pt-7">
         <DataSourceNote />
         <Button asChild size="lg">
           <Link href="/trip">
-            View trip plan <ArrowRight aria-hidden />
+            See the full list <ArrowRight aria-hidden />
           </Link>
         </Button>
       </div>
