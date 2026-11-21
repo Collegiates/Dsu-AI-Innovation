@@ -6,6 +6,12 @@
 export const APP_NAME = "GrocerySave";
 
 /**
+ * The data-honesty line shown on the trip and list pages, so nobody mistakes online prices for checkout prices.
+ * Example: it appears under the trip total as small grey text.
+ */
+export const DATA_SOURCE_NOTE = "Online prices from aldi.us and walmart.com, viewed Nov 21, 2026. In-store prices may differ.";
+
+/**
  * How much the shopper cares about time versus money.
  * "fastest" = time matters a lot, "balanced" = a middle ground, "maxSavings" = only money counts.
  * Example: a shopper who picks "balanced" accepts a 10-minute detour if it saves more than $3.

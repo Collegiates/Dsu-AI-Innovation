@@ -13,7 +13,8 @@
     "eval": "vitest run --project eval --passWithNoTests",
     "test:security": "vitest run --project security",
     "check": "npm run typecheck && npm run lint && npm run test && npm run eval && npm run test:security",
-    "report": "tsx scripts/test-report.ts"
+    "report": "tsx scripts/test-report.ts",
+    "import-data": "tsx scripts/import-csv.ts"
   },
   "dependencies": {
     "@google/genai": "^3.6.1",

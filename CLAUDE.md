@@ -70,6 +70,7 @@ src/
     deals/                  Waitlist price-drop detection
     preferences/            localStorage read/write (hidden brands, waitlist)
 data/
+  raw/                      Source CSVs from the data person (stores, products, price-audit); `npm run import-data` turns them into the JSON below
   stores.json               Stores on the demo commute, with detour times
   products.json             ~50 real products with prices collected Nov 21
   embeddings.json           Pre-computed product embeddings (generated)
@@ -144,7 +145,7 @@ Inside functions, comment only the lines where the *reason* is not obvious.
 - Money is always formatted by `src/lib/pricing/money.ts`, with tabular numbers so columns line up.
 - Every data view has loading, empty and error states.
 - Accessibility: text contrast at least 4.5:1, visible keyboard focus, labels on every input, and icons paired with text.
-- Show data honesty in the UI: a small line "Prices collected Nov 21, 2026 from store websites" on the trip and list pages. Simulated features are labeled (e.g. a "Simulate next week's prices" button on Deal Watch).
+- Show data honesty in the UI: a small DataSourceNote line "Online prices from aldi.us and walmart.com, viewed Nov 21, 2026. In-store prices may differ." on the trip and list pages (text lives in `DATA_SOURCE_NOTE` in `src/lib/config/app.ts`). Simulated features are labeled (e.g. a "Simulate next week's prices" button on Deal Watch).
 - The app name comes from `src/lib/config/app.ts` (`APP_NAME`), so renaming is a one-line change.
 
 ## Docs (evidence for judges — keep them updated)

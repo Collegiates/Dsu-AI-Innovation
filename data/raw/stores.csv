@@ -1,0 +1,5 @@
+store_id,name,chain,address,on_route_label,detour_minutes,detour_miles
+walmart-dover,Walmart Supercenter #1736,Walmart,"36 Jerome Dr, Dover, DE 19901",NOT MEASURED - enter real route,,
+aldi-dover,ALDI Dover,ALDI,"10 N Dupont Hwy, Bldg 5, Dover, DE 19901",NOT MEASURED - enter real route,,
+foodlion-dover-forest,Food Lion - Forest Ave,Food Lion,"1030 Forest Ave, Dover, DE 19904",NOT MEASURED - prices not collected,,
+target-dover,Target Dover #1312,Target,"148 John Hunn Brown Rd, Dover, DE 19901",NOT MEASURED - prices not collected,,
