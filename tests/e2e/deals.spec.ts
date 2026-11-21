@@ -3,14 +3,14 @@ import { expect, test } from "@playwright/test";
 test("Deal Watch: load the demo waitlist, simulate next week, and see the drops highlighted", async ({ page }) => {
   await page.goto("/deals");
   await expect(page.getByText("Your waitlist is empty")).toBeVisible();
-  await page.getByRole("button", { name: "Load demo waitlist" }).click();
+  await page.getByRole("button", { name: "Load starter waitlist" }).click();
 
   const rows = page.getByRole("main").getByRole("listitem");
   await expect(rows).toHaveCount(4);
   await expect(page.getByLabel(/^Target price for .*Paper Towels/)).toHaveValue("7.50");
   await expect(page.getByText(/alerts are sent by email/)).toBeVisible();
 
-  await page.getByRole("button", { name: "Simulate next week's prices" }).click();
+  await page.getByRole("button", { name: "Preview next week's prices" }).click();
   await expect(page.getByText("Showing simulated prices for next week")).toBeVisible();
   await expect(page.getByRole("status")).toHaveText("3 of 4 waitlist items are deals next week.");
 

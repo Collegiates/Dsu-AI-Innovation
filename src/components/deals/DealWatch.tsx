@@ -25,7 +25,7 @@ function cheapestNow(groupKey: string, products: readonly Product[]): Product | 
 
 /**
  * Deal Watch: the waitlist of occasional buys, each with today's best price, its store and an optional target price.
- * The clearly labeled "Simulate next week's prices" button applies the simulated fixture and highlights items whose
+ * The clearly labeled "Preview next week's prices" button applies the simulated fixture and highlights items whose
  * price dropped 10% or more or reached the target (old price struck through, new price, % saved, store).
  * Example: Tide Free & Gentle $14.29 → $11.99 at ALDI, 16% less.
  */
@@ -46,10 +46,10 @@ export function DealWatch({ products, stores, nextWeek }: { products: Product[];
       <EmptyState
         icon={Tag}
         title="Your waitlist is empty"
-        description="Add things you buy now and then (toothpaste, shampoo) and buy them when they're cheap. Use 'Move to Deal Watch' on My List, or load the demo waitlist."
+        description="Add things you buy now and then (toothpaste, shampoo) and buy them when they're cheap. Use 'Move to Deal Watch' on My List, or load a starter waitlist."
         action={
           <div className="flex gap-2">
-            <Button onClick={() => save([...DEMO_WAITLIST])}>Load demo waitlist</Button>
+            <Button onClick={() => save([...DEMO_WAITLIST])}>Load starter waitlist</Button>
             <Button asChild variant="outline">
               <Link href="/list">Go to My List</Link>
             </Button>
@@ -75,8 +75,8 @@ export function DealWatch({ products, stores, nextWeek }: { products: Product[];
             <p className="font-medium">{simulated ? "Showing simulated prices for next week" : "Want to see an alert?"}</p>
             <p className="text-sm text-muted-foreground">
               {simulated
-                ? "These sale prices are made up for the demo. They are not real prices."
-                : "Simulate next week's prices to see which waitlist items would drop. The prices are made up for the demo."}
+                ? "These sale prices are simulated, not real prices."
+                : "Preview next week's prices to see which waitlist items would drop (simulated prices)."}
             </p>
           </div>
         </div>
@@ -89,7 +89,7 @@ export function DealWatch({ products, stores, nextWeek }: { products: Product[];
           ) : (
             <Button onClick={() => setSimulated(true)}>
               <FlaskConical aria-hidden />
-              Simulate next week&apos;s prices
+              Preview next week&apos;s prices
             </Button>
           )
         ) : (

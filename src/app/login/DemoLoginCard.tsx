@@ -35,12 +35,12 @@ export function DemoLoginCard() {
       <h1 className="mt-8 text-center font-display text-3xl font-semibold tracking-tight">Welcome back</h1>
       <p className="mt-2 text-center text-muted-foreground">Pick up this week&apos;s plan where James left it.</p>
       <Button size="lg" className="mt-8 h-12 w-full text-base" onClick={continueAsDemo}>
-        Continue as James (demo) <ArrowRight aria-hidden />
+        Continue as James <ArrowRight aria-hidden />
       </Button>
-      <p className="mt-4 text-center text-sm text-muted-foreground">Demo account — no sign-up needed.</p>
+      <p className="mt-4 text-center text-sm text-muted-foreground">No password needed.</p>
       {blocked ? (
         <p role="alert" className="mt-4 rounded-lg border bg-background p-3 text-center text-sm">
-          This browser blocked saving the demo login. Turn off private browsing and try again.
+          This browser blocked saving your sign-in. Turn off private browsing and try again.
         </p>
       ) : null}
     </div>

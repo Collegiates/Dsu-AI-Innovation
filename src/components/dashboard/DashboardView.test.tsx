@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { RECEIPT_UPLOADED_KEY } from "@/components/plan/AfterReceipt";
 import type { DashboardData } from "@/lib/dashboard/data";
 import { RECALL_LABEL, type RecallMatch } from "@/lib/recalls/match";
 import { optimizeTrip } from "@/lib/trip/optimizer";
@@ -28,6 +29,9 @@ function fixture(overrides: Partial<DashboardData> = {}): DashboardData {
 }
 
 describe("DashboardView", () => {
+  // The savings and the winning store appear only after a receipt upload.
+  beforeEach(() => localStorage.setItem(RECEIPT_UPLOADED_KEY, "true"));
+
   it("shows savings computed by the optimizer, not hard-coded numbers", () => {
     render(<DashboardView data={fixture()} />);
     // Typical $12.46 (coffee $9 + milk $3.46). Optimized: coffee at ALDI $5 + milk $3.46 = $8.46, no gas. Saves $4.00.

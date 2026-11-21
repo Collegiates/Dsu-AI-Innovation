@@ -6,7 +6,7 @@ import { CommuteAnimation } from "./CommuteAnimation";
 import "./landing.css";
 
 /**
- * The first screen: the promise in one line, what the app does in one sentence, and the "Try the demo" button,
+ * The first screen: the promise in one line, what the app does in one sentence, and the "Get started" button,
  * with the animated store drawing behind them.
  */
 export function Hero() {
@@ -26,7 +26,7 @@ export function Hero() {
         <div className="mt-9 flex items-center gap-4">
           <Button asChild size="lg" className="h-12 px-6 text-base">
             <Link href="/login">
-              Try the demo <ArrowRight aria-hidden />
+              Get started <ArrowRight aria-hidden />
             </Link>
           </Button>
           <a href="#how-it-works" className="text-sm font-medium text-primary underline-offset-4 hover:underline">

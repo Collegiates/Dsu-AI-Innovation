@@ -91,8 +91,8 @@ describe("Recalls & Safety", () => {
   it("shows the national recall example as a labeled hypothetical past purchase, with the FDA's lot code and link", () => {
     render(<RecallsView products={[]} />);
     const card = screen.getByRole("region", { name: "Great Value Organic Triple Berry Blend, 10 oz" });
-    expect(card).toHaveTextContent("Past purchases (demo)");
-    expect(card).toHaveTextContent("National recall example: hypothetical past purchase; not listed for Delaware.");
+    expect(card).toHaveTextContent("From your past purchases");
+    expect(card).toHaveTextContent("National recall. Delaware was not on the FDA's list of affected states.");
     expect(card).toHaveTextContent("6040 01-6");
     expect(card).toHaveTextContent("7874211226");
     expect(within(card).getByRole("link", { name: /Read the FDA announcement/ })).toHaveAttribute("href", expect.stringMatching(/^https:\/\/www\.fda\.gov\//));

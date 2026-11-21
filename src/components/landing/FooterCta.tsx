@@ -17,7 +17,7 @@ export function FooterCta() {
           </div>
           <Button asChild size="lg" className="h-12 shrink-0 px-6 text-base">
             <Link href="/login">
-              Try the demo <ArrowRight aria-hidden />
+              Get started <ArrowRight aria-hidden />
             </Link>
           </Button>
         </div>

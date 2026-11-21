@@ -7,7 +7,7 @@ export type ReceiptSource = "ai" | "text" | "demo-sample";
 export const RECEIPT_NOTES: Record<ReceiptSource, string> = {
   ai: "Items read from your receipt by AI. Check them on My List.",
   text: "Items read from your receipt text.",
-  "demo-sample": "Demo: receipt uploaded. James's sample grocery list is used for the plan.",
+  "demo-sample": "Receipt uploaded. Planning your usual weekly list.",
 };
 
 /** Turns a file into base64 text (letters and digits only) so it can be sent as JSON. */

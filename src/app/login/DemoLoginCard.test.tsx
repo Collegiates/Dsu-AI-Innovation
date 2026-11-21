@@ -18,13 +18,13 @@ describe("demo login", () => {
   it("shows the app name from config and the no-sign-up note", () => {
     render(<DemoLoginCard />);
     expect(screen.getByRole("link", { name: APP_NAME })).toHaveAttribute("href", "/");
-    expect(screen.getByText("Demo account — no sign-up needed.")).toBeInTheDocument();
+    expect(screen.getByText("No password needed.")).toBeInTheDocument();
   });
 
   it("signs in as the demo shopper and goes to the plan", async () => {
     const user = userEvent.setup();
     render(<DemoLoginCard />);
-    await user.click(screen.getByRole("button", { name: "Continue as James (demo)" }));
+    await user.click(screen.getByRole("button", { name: "Continue as James" }));
     expect(isDemoSignedIn()).toBe(true);
     expect(push).toHaveBeenCalledWith("/plan");
   });
@@ -35,7 +35,7 @@ describe("demo login", () => {
     });
     const user = userEvent.setup();
     render(<DemoLoginCard />);
-    await user.click(screen.getByRole("button", { name: "Continue as James (demo)" }));
+    await user.click(screen.getByRole("button", { name: "Continue as James" }));
     expect(screen.getByRole("alert")).toHaveTextContent(/blocked saving/);
     expect(push).not.toHaveBeenCalled();
     setItem.mockRestore();

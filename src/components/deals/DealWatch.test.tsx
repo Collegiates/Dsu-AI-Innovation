@@ -23,7 +23,7 @@ describe("Deal Watch", () => {
     render(<DealWatch products={products} stores={stores} nextWeek={nextWeek} />);
     expect(screen.getByText("Your waitlist is empty")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Go to My List" })).toHaveAttribute("href", "/list");
-    await user.click(screen.getByRole("button", { name: "Load demo waitlist" }));
+    await user.click(screen.getByRole("button", { name: "Load starter waitlist" }));
     expect(readPreference("waitlist")).toEqual(DEMO_WAITLIST);
   });
 
@@ -40,9 +40,9 @@ describe("Deal Watch", () => {
     writePreference("waitlist", [{ groupKey: "detergent" }, { groupKey: "shampoo" }]);
     const user = userEvent.setup();
     render(<DealWatch products={products} stores={stores} nextWeek={nextWeek} />);
-    await user.click(screen.getByRole("button", { name: "Simulate next week's prices" }));
+    await user.click(screen.getByRole("button", { name: "Preview next week's prices" }));
 
-    expect(screen.getByText(/made up for the demo/)).toBeInTheDocument();
+    expect(screen.getByText(/simulated, not real prices/)).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("1 of 2 waitlist items are deals next week.");
     const row = screen.getByRole("listitem", { name: "Tide Free & Gentle Detergent" });
     expect(row.querySelector("s")).toHaveTextContent("$14.29");
@@ -75,7 +75,7 @@ describe("Deal Watch", () => {
   it("hides the simulate button when the simulated prices file is unavailable, and handles items no store sells", () => {
     writePreference("waitlist", [{ groupKey: "caviar" }]);
     render(<DealWatch products={products} stores={stores} nextWeek={null} />);
-    expect(screen.queryByRole("button", { name: "Simulate next week's prices" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Preview next week's prices" })).not.toBeInTheDocument();
     expect(screen.getByText("None of the stores sells this right now.")).toBeInTheDocument();
   });
 });

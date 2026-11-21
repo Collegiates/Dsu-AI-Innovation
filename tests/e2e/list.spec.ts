@@ -4,7 +4,7 @@ test("My List: load the demo list, match it, adjust it, and go to the trip plan"
   await page.goto("/list");
   await expect(page.getByText("Your list is empty")).toBeVisible();
 
-  await page.getByRole("button", { name: "Load demo list" }).click();
+  await page.getByRole("button", { name: "Load my usual list" }).click();
   await page.getByRole("button", { name: "Match my list" }).click();
 
   const results = page.getByRole("region", { name: "Matched products" });

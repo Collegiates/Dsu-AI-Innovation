@@ -121,7 +121,7 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
             {status.kind === "loading" ? "Matching…" : "Match my list"}
           </Button>
           <Button type="button" variant="outline" onClick={() => setDraft(DEMO_LIST.join("\n"))}>
-            Load demo list
+            Load my usual list
           </Button>
         </div>
         <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed px-3 py-2.5 text-sm font-medium hover:bg-primary-soft/50 has-focus-visible:outline-2 has-focus-visible:outline-ring">
@@ -179,7 +179,7 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
           <EmptyState
             icon={ListChecks}
             title="Your list is empty"
-            description="Type a few items on the left, or load the demo list, then press Match my list."
+            description="Type a few items on the left, upload a receipt, or load your usual list, then press Match my list."
           />
         ) : (
           <ul className="divide-y rounded-2xl border bg-surface">

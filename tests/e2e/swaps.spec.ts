@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("Smart Swaps: shows cheaper swaps for the list, tries one, and hides a brand with undo", async ({ page }) => {
   await page.goto("/list");
-  await page.getByRole("button", { name: "Load demo list" }).click();
+  await page.getByRole("button", { name: "Load my usual list" }).click();
   await page.getByRole("button", { name: "Match my list" }).click();
   await expect(page.getByRole("region", { name: "Matched products" }).getByRole("listitem")).toHaveCount(16);
 

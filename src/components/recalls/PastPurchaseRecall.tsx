@@ -11,7 +11,7 @@ export function PastPurchaseRecall() {
     <section aria-labelledby="past-recall-title" className="rounded-2xl border border-recall/30 bg-recall-soft p-5">
       <p className="flex items-center gap-2 text-sm font-semibold text-recall">
         <ShieldAlert aria-hidden className="size-4" />
-        Past purchases (demo) · Possible match — check the lot code on your package
+        From your past purchases · Possible match — check the lot code on your package
       </p>
       <h2 id="past-recall-title" className="mt-2 text-lg font-medium">
         {R.product}

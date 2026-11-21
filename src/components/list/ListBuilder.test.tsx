@@ -41,7 +41,7 @@ describe("My List", () => {
     const user = userEvent.setup();
     render(<ListBuilder products={products} stores={stores} />);
 
-    await user.click(screen.getByRole("button", { name: "Load demo list" }));
+    await user.click(screen.getByRole("button", { name: "Load my usual list" }));
     expect(screen.getByLabelText("Your list")).toHaveValue(DEMO_LIST.join("\n"));
     await user.click(screen.getByRole("button", { name: "Match my list" }));
 

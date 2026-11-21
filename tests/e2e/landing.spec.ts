@@ -11,7 +11,7 @@ test("landing page loads at 1440x900 with the hero, how it works, the numbers, t
   await expect(page.getByRole("navigation", { name: "Main" })).toHaveCount(0);
 
   // Everything in the hero, including the button, fits on the first 1440x900 screen.
-  const button = page.getByRole("main").getByRole("link", { name: /Try the demo/ }).first();
+  const button = page.getByRole("main").getByRole("link", { name: /Get started/ }).first();
   const box = await button.boundingBox();
   expect(box && box.y + box.height).toBeLessThanOrEqual(900);
 
@@ -28,22 +28,22 @@ test("landing page loads at 1440x900 with the hero, how it works, the numbers, t
   await expect(page.getByText("Code does the math.")).toBeVisible();
 });
 
-test("demo journey: landing → Try the demo → login → lands on /plan", async ({ page }) => {
+test("demo journey: landing → Get started → login → lands on /plan", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("main").getByRole("link", { name: /Try the demo/ }).first().click();
+  await page.getByRole("main").getByRole("link", { name: /Get started/ }).first().click();
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByText("Demo account — no sign-up needed.")).toBeVisible();
+  await expect(page.getByText("No password needed.")).toBeVisible();
 
   if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.SCREENSHOT_DIR}/login-1440x900.png` });
 
-  await page.getByRole("button", { name: "Continue as James (demo)" }).click();
+  await page.getByRole("button", { name: "Continue as James" }).click();
   await expect(page).toHaveURL(/\/plan$/);
   expect(await page.evaluate((key) => localStorage.getItem(key), DEMO_FLAG_KEY)).toBe("true");
 });
 
 test("regression: the demo login landed on a missing /plan page instead of the dashboard", async ({ page }) => {
   await page.goto("/login");
-  await page.getByRole("button", { name: "Continue as James (demo)" }).click();
+  await page.getByRole("button", { name: "Continue as James" }).click();
   await expect(page).toHaveURL(/\/plan$/);
   await expect(page.getByRole("heading", { level: 1, name: "This week" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");

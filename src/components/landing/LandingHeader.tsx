@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/config/app";
 
-/** The landing page's top bar: the app name on the left and a "Try the demo" button on the right. */
+/** The landing page's top bar: the app name on the left and a "Get started" button on the right. */
 export function LandingHeader() {
   return (
     <header className="relative z-10 mx-auto flex h-18 w-full max-w-6xl items-center justify-between px-10">
@@ -18,7 +18,7 @@ export function LandingHeader() {
           How it works
         </a>
         <Button asChild variant="outline">
-          <Link href="/login">Try the demo</Link>
+          <Link href="/login">Get started</Link>
         </Button>
       </nav>
     </header>

@@ -17,8 +17,8 @@ test("demo journey, offline: landing → login → stores → list → trip resu
 
   // 1. Landing → login → /plan.
   await page.goto("/");
-  await page.getByRole("main").getByRole("link", { name: /Try the demo/ }).first().click();
-  await page.getByRole("button", { name: "Continue as James (demo)" }).click();
+  await page.getByRole("main").getByRole("link", { name: /Get started/ }).first().click();
+  await page.getByRole("button", { name: "Continue as James" }).click();
   await expect(page).toHaveURL(/\/plan$/);
 
   // 2. Pick the stores: Walmart and ALDI (checked by default). Food Lion and Target can be ticked but have no prices yet.
@@ -35,7 +35,7 @@ test("demo journey, offline: landing → login → stores → list → trip resu
 
   // 3. Load James's list and match it.
   await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "My List" }).click();
-  await page.getByRole("button", { name: "Load demo list" }).click();
+  await page.getByRole("button", { name: "Load my usual list" }).click();
   await page.getByRole("button", { name: "Match my list" }).click();
   const matches = page.getByRole("region", { name: "Matched products" });
   // The first match request can take a few seconds while the dev server compiles the route.
@@ -61,7 +61,7 @@ test("demo journey, offline: landing → login → stores → list → trip resu
   await banner.getByRole("link", { name: "check the lot code" }).click();
   await expect(page).toHaveURL(/\/recalls$/);
   const pastRecall = page.getByRole("region", { name: "Great Value Organic Triple Berry Blend, 10 oz" });
-  await expect(pastRecall).toContainText("National recall example: hypothetical past purchase; not listed for Delaware.");
+  await expect(pastRecall).toContainText("National recall. Delaware was not on the FDA's list of affected states.");
   await expect(pastRecall).toContainText("6040 01-6");
   await page.getByRole("button", { name: "Check my list now" }).click();
   await expect(page.getByRole("status")).toContainText("Saved copy of openFDA data (offline)");
@@ -69,8 +69,8 @@ test("demo journey, offline: landing → login → stores → list → trip resu
 
   // 7. Deal Watch: simulate next week and see 3 drops.
   await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Deal Watch" }).click();
-  await page.getByRole("button", { name: "Load demo waitlist" }).click();
-  await page.getByRole("button", { name: "Simulate next week's prices" }).click();
+  await page.getByRole("button", { name: "Load starter waitlist" }).click();
+  await page.getByRole("button", { name: "Preview next week's prices" }).click();
   await expect(page.getByRole("status")).toHaveText("3 of 4 waitlist items are deals next week.");
 
   // Nothing the demo needed came from the internet.

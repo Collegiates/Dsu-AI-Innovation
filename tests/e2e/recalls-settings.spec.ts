@@ -6,7 +6,7 @@ test("Recalls & Safety: checks the list against FDA recalls and says when and fr
   await expect(page.getByText("No list to check yet")).toBeVisible();
 
   await page.goto("/list");
-  await page.getByRole("button", { name: "Load demo list" }).click();
+  await page.getByRole("button", { name: "Load my usual list" }).click();
   await page.getByRole("button", { name: "Match my list" }).click();
   await expect(page.getByRole("region", { name: "Matched products" }).getByRole("listitem")).toHaveCount(16);
 

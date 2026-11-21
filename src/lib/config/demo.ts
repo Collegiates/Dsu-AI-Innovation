@@ -43,7 +43,7 @@ export const DEMO_WAITLIST = [
  * and labeled so. The recall did not list Delaware. Example: shown as a banner on Trip Plan and in full on Recalls & Safety.
  */
 export const DEMO_PAST_PURCHASE_RECALL = {
-  label: "National recall example: hypothetical past purchase; not listed for Delaware.",
+  label: "National recall. Delaware was not on the FDA's list of affected states.",
   product: "Great Value Organic Triple Berry Blend, 10 oz",
   upc: "7874211226",
   lotCode: "6040 01-6",
