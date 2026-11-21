@@ -25,3 +25,6 @@ export const SwapsRequestSchema = z
   })
   .strict();
 
+
+/** What POST /api/recalls accepts: the product ids on the current list (up to 100). */
+export const RecallsRequestSchema = z.object({ productIds: z.array(id).max(inputLimits.maxListItems) }).strict();

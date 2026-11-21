@@ -96,3 +96,23 @@ describe("POST /api/swaps", async () => {
     expect((await POST(post({ basket: [{ usualProductId: "x", amount: { value: 1, unit: "liters" } }] }))).status).toBe(400);
   });
 });
+
+describe("POST /api/recalls", async () => {
+  const { POST } = await import("@/app/api/recalls/route");
+
+  it("checks list products against the saved recalls in demo mode and labels matches as possible", async () => {
+    vi.stubEnv("DEMO_MODE", "true");
+    const res = await POST(post({ productIds: [catalog.products[0].id, "unknown-id"] }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toMatchObject({ source: "fixture", label: "Possible match — check the lot code on your package" });
+    expect(Array.isArray(body.matches)).toBe(true);
+    vi.unstubAllEnvs();
+  });
+
+  it("rejects oversized and malformed input", async () => {
+    expect((await POST(post({ productIds: Array.from({ length: 101 }, (_, i) => `p${i}`) }))).status).toBe(400);
+    expect((await POST(post({ productIds: ["x".repeat(201)] }))).status).toBe(400);
+    expect((await POST(post({ productIds: "p1" }))).status).toBe(400);
+  });
+});

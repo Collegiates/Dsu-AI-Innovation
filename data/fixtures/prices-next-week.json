@@ -1,0 +1,9 @@
+{
+  "simulated": true,
+  "note": "SIMULATED prices for the \"Simulate next week's prices\" button on Deal Watch. Three waitlist items are discounted; these are not real prices. Everything else stays at the real prices viewed Nov 21, 2026.",
+  "changes": [
+    { "productId": "aldi-dover--crest--whitening-deep-clean-toothpaste-effervescent-mint", "salePrice": 3.99 },
+    { "productId": "aldi-dover--tide--free-and-gentle-liquid-laundry-detergent", "salePrice": 11.99 },
+    { "productId": "walmart-dover--great-value--everyday-strong-paper-towels-6-triple-rolls", "salePrice": 7.49 }
+  ]
+}

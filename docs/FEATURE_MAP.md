@@ -46,3 +46,29 @@ For each feature: what it does, the page URL, the code files and the test files.
 **Code:** `src/lib/swaps/findSwaps.ts`, `src/lib/ai/explainSwap.ts`, `src/lib/ai/validators.ts`, `src/app/api/swaps/route.ts`
 
 **Tests:** `src/lib/swaps/findSwaps.test.ts`, `src/lib/ai/explainSwap.test.ts`, `src/lib/ai/validators.test.ts`, `tests/security/api-routes.test.ts`
+
+## Recalls & Safety
+
+**What it does:** Checks the products on the list against FDA food recalls from the last 12 months (openFDA, the FDA's public data service). A product is flagged only when the recall's product description contains its **brand** (whole phrase) **and** at least one **key product word** (whole word, ignoring describing words like "fat", "fresh", "frozen"). Every match shows the recall number, reason, class, date and recalling firm, and is always labeled "Possible match — check the lot code on your package". The live API has a 5-second timeout; in demo mode, on timeout, or offline, a saved real response (`data/fixtures/recalls.json`, 1,000 records, trimmed to the fields used) is used. Malformed records are skipped and counted.
+
+**API:** `POST /api/recalls` with `{ "productIds": [...] }`. Page: `/recalls` (UI not built yet).
+
+**Code:** `src/lib/recalls/openfda.ts`, `src/lib/recalls/schema.ts`, `src/lib/recalls/match.ts`, `src/app/api/recalls/route.ts`
+
+**Tests:** `src/lib/recalls/match.test.ts`, `src/lib/recalls/schema.test.ts`, `src/lib/recalls/openfda.test.ts`, `tests/security/api-routes.test.ts`
+
+## Deal Watch
+
+**What it does:** A waitlist of occasional buys (product group + optional target price). An item is a deal when the same product's price fell at least 10%, or is at or below the target; the cheapest such product per item is shown with its store and the amount saved. The "Simulate next week's prices" button applies `data/fixtures/prices-next-week.json`: **simulated** sale prices on 3 real products (toothpaste, detergent, paper towels). With the demo waitlist this gives 3 alerts and none for shampoo.
+
+**Page:** `/deals` (UI not built yet).
+
+**Code:** `src/lib/deals/detectDeals.ts`, `src/lib/deals/nextWeek.ts`, `src/lib/config/demo.ts` (`DEMO_WAITLIST`)
+
+**Tests:** `src/lib/deals/detectDeals.test.ts`, `src/lib/deals/nextWeek.test.ts`
+
+## Saved preferences
+
+**What it does:** Typed helpers that save hidden brands, hidden products, the Deal Watch waitlist and the trip preference in the browser's localStorage. Every value is checked with zod on read and write; if storage is blocked, full or corrupted, the defaults are used and nothing crashes. Nothing sensitive is stored.
+
+**Code:** `src/lib/preferences/storage.ts` · **Tests:** `src/lib/preferences/storage.test.ts`
