@@ -10,11 +10,12 @@
     "lint": "eslint",
     "test": "vitest run --project unit",
     "test:e2e": "playwright test",
-    "eval": "vitest run --project eval --passWithNoTests",
+    "eval": "vitest run --project eval --silent=false",
     "test:security": "vitest run --project security",
     "check": "npm run typecheck && npm run lint && npm run test && npm run eval && npm run test:security",
     "report": "tsx scripts/test-report.ts",
-    "import-data": "tsx scripts/import-csv.ts"
+    "import-data": "tsx scripts/import-csv.ts",
+    "build-embeddings": "tsx --conditions=react-server scripts/build-embeddings.ts"
   },
   "dependencies": {
     "@google/genai": "^3.6.1",

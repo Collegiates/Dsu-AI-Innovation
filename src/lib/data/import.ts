@@ -5,10 +5,14 @@ import { ProductSchema, SizeUnitSchema, StoreSchema, type Product, type Store } 
 /** The CSV files the data person fills in, read as plain text. */
 export type RawCsvFiles = { storesCsv: string; productsCsv: string; auditCsv: string };
 
-/** Either the cleaned stores and products, or every problem found, each naming its file and row. */
+/**
+ * Either the cleaned stores and products, or every problem found, each naming its file and row.
+ * On failure, "validProducts" holds the product rows that passed, so the AI eval can still use real data
+ * while a store detour is being measured. The app itself never uses a failed import.
+ */
 export type ImportResult =
   | { ok: true; stores: Store[]; products: Product[] }
-  | { ok: false; errors: string[] };
+  | { ok: false; errors: string[]; validProducts: Product[] };
 
 const STORE_COLUMNS = ["store_id", "name", "chain", "address", "on_route_label", "detour_minutes", "detour_miles"] as const;
 const PRODUCT_COLUMNS = [
@@ -112,7 +116,7 @@ export function importCatalog(files: RawCsvFiles): ImportResult {
   for (const [file, parsed] of [["stores.csv", storesCsv], ["products.csv", productsCsv], ["price-audit.csv", auditCsv]] as const) {
     for (const col of parsed.missingColumns) errors.push(`${file}: missing column "${col}"`);
   }
-  if (errors.length > 0) return { ok: false, errors };
+  if (errors.length > 0) return { ok: false, errors, validProducts: [] };
 
   const stores: Store[] = [];
   const storeIds = new Set<string>();
@@ -214,5 +218,5 @@ export function importCatalog(files: RawCsvFiles): ImportResult {
     );
   }
 
-  return errors.length > 0 ? { ok: false, errors } : { ok: true, stores, products };
+  return errors.length > 0 ? { ok: false, errors, validProducts: products } : { ok: true, stores, products };
 }

@@ -42,3 +42,33 @@ export const assumptions = {
     maxSavings: 0.0,
   } satisfies Record<TripPreference, number>,
 } as const;
+
+/**
+ * Limits and thresholds for the AI features, kept in one place so they can be tuned and explained.
+ * Example: an embedding similarity of 0.82 for "2% milk" vs. a 2% milk product counts as "Same product".
+ */
+export const aiConfig = {
+  // Embedding similarity (cosine, from 0 to 1) at or above which a match is labeled "Same product".
+  sameProductThreshold: 0.8,
+  // Below sameProductThreshold but at or above this, a match is labeled "Similar"; lower means "No match".
+  similarThreshold: 0.6,
+  // Keyword fallback: share of the typed words that must be found in a product to count as a match.
+  keywordMatchThreshold: 0.5,
+  // How many nearest catalog products the embedding search keeps before code filters them.
+  topCandidates: 5,
+  // Every Gemini call gives up after this long and the app uses its non-AI fallback instead.
+  timeoutMs: 5000,
+  // Longest swap explanation, in words, that Gemini may write.
+  maxExplanationWords: 25,
+} as const;
+
+/**
+ * Input limits for every API route, so one request can't flood the app or the AI.
+ * Example: a list with 101 items, or an item 101 characters long, is rejected.
+ */
+export const inputLimits = {
+  maxListItems: 100,
+  maxItemChars: 100,
+  // AI routes accept this many requests per minute from one address.
+  aiRequestsPerMinute: 30,
+} as const;

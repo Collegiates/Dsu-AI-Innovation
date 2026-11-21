@@ -26,3 +26,23 @@ For each feature: what it does, the page URL, the code files and the test files.
 **Code:** `src/lib/data/schema.ts`, `src/lib/data/csv.ts`, `src/lib/data/import.ts`, `src/lib/data/load.ts`, `scripts/import-csv.ts`
 
 **Tests:** `src/lib/data/import.test.ts`, `src/lib/data/load.test.ts`
+
+## AI list matching
+
+**What it does:** Turns messy list text ("2 gal milk", "yougurt", "the cheap bread") into catalog products. Three steps: embeddings find the 5 closest products by meaning → code keeps only the top product's category and separates variants → code sorts interchangeable products by unit price. Each line gets a label: "Same product", "Similar" (check it) or "No match". With no Gemini key, no saved embeddings, or no internet, it falls back to keyword matching (word overlap that tolerates small typos). The typed text is compared as data only; it never goes into an AI prompt.
+
+**API:** `POST /api/match` with `{ "items": ["2 gal milk", ...] }`. Page: `/list` (UI not built yet).
+
+**Code:** `src/lib/matching/match.ts` (server entry), `src/lib/matching/core.ts` (embedding + keyword matching, labels, filters), `src/lib/matching/text.ts` (word normalization, typo tolerance), `src/lib/matching/embeddings.ts`, `src/lib/ai/gemini.ts`, `scripts/build-embeddings.ts`, `src/app/api/match/route.ts`
+
+**Tests:** `src/lib/matching/core.test.ts`, `tests/ai-eval/matching.eval.test.ts` (golden set), `tests/security/api-routes.test.ts`
+
+## Smart Swaps
+
+**What it does:** For each list item, finds the cheapest similar product (same category and product family) from a different brand that is cheaper per unit **and** cheaper at the register for the amount needed, skipping hidden brands and products. Savings are computed by code. Gemini writes a one-sentence explanation from those facts only; the validator rejects any sentence with a wrong amount or percentage, an outside brand or store, HTML, or more than 25 words, and a template sentence is used instead. Explanations are cached by swap id.
+
+**API:** `POST /api/swaps` with `{ "basket": [{ "usualProductId": "..." }], "hiddenBrands": [], "hiddenProducts": [] }`. Page: `/swaps` (UI not built yet).
+
+**Code:** `src/lib/swaps/findSwaps.ts`, `src/lib/ai/explainSwap.ts`, `src/lib/ai/validators.ts`, `src/app/api/swaps/route.ts`
+
+**Tests:** `src/lib/swaps/findSwaps.test.ts`, `src/lib/ai/explainSwap.test.ts`, `src/lib/ai/validators.test.ts`, `tests/security/api-routes.test.ts`
