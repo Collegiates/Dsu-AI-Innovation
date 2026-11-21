@@ -36,14 +36,14 @@ test("demo journey: landing → Get started → login → lands on /plan", async
 
   if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.SCREENSHOT_DIR}/login-1440x900.png` });
 
-  await page.getByRole("button", { name: "Continue as James" }).click();
+  await page.getByRole("button", { name: "Continue as Tasha" }).click();
   await expect(page).toHaveURL(/\/plan$/);
   expect(await page.evaluate((key) => localStorage.getItem(key), DEMO_FLAG_KEY)).toBe("true");
 });
 
 test("regression: the demo login landed on a missing /plan page instead of the dashboard", async ({ page }) => {
   await page.goto("/login");
-  await page.getByRole("button", { name: "Continue as James" }).click();
+  await page.getByRole("button", { name: "Continue as Tasha" }).click();
   await expect(page).toHaveURL(/\/plan$/);
   await expect(page.getByRole("heading", { level: 1, name: "This week" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");

@@ -8,7 +8,7 @@ import { Reveal } from "./Reveal";
 export const STATS = [
   { value: 32.6, decimals: 1, suffix: "%", label: "of income goes to food in the lowest-income households" },
   { value: 88, suffix: "%", label: "of grocery shoppers visit more than one store a month" },
-  { value: 219, prefix: "$", label: "a year James saves with swaps" },
+  { value: 219, prefix: "$", label: "a year Tasha saves with swaps" },
 ] as const;
 
 export function StatsBand() {

@@ -16,7 +16,7 @@ type ReceiptSource = "ai" | "text" | "demo-sample";
 /**
  * POST /api/receipt: reads the item names from a receipt so they can fill the shopping list.
  * Text receipts are read by plain code; photos and PDFs by Gemini (checked: item names only, no prices).
- * If nothing can be read (an empty receipt, demo mode, no AI key), it returns James's sample receipt and says so,
+ * If nothing can be read (an empty receipt, demo mode, no AI key), it returns Tasha's sample receipt and says so,
  * so the demo keeps going without pretending. Example: { "kind": "text", "text": "BANANAS 0.50" } → { source: "text", items: ["BANANAS"] }.
  */
 export async function POST(request: Request): Promise<Response> {

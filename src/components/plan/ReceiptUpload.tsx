@@ -14,7 +14,7 @@ import { markReceiptUploaded } from "./AfterReceipt";
 /**
  * The Dashboard's "Upload your receipt" button: sends the receipt (PDF, photo or text) to be read, matches its items
  * to real products, saves them as the grocery list, and opens the Trip Plan, which names the winning store(s).
- * If the receipt can't be read (or in demo mode), James's sample list is used and the Trip Plan page says so.
+ * If the receipt can't be read (or in demo mode), Tasha's sample list is used and the Trip Plan page says so.
  * Example: upload receipt.pdf → "Shop at ALDI + Walmart: $51.05" on /trip.
  */
 export function ReceiptUpload() {

@@ -25,7 +25,7 @@ npm run import-data
 npm run dev
 ```
 
-Open http://localhost:3000 at 1440×900, press **Try the demo**, then **Continue as James (demo)**.
+Open http://localhost:3000 at 1440×900, press **Try the demo**, then **Continue as Tasha (demo)**.
 
 - `npm run import-data` turns `data/raw/*.csv` into `data/stores.json` and `data/products.json`. It refuses blank store detours,
   so each store's detour must be measured and entered in `data/raw/stores.csv` first.

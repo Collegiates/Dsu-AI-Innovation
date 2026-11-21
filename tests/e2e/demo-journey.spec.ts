@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 /**
  * The exact live-demo script, start to finish, with the internet cut off: any request that leaves localhost is
  * blocked, so this proves the demo survives bad wifi (DEMO_MODE=true is set by playwright.config.ts).
- * landing → login → /plan → pick Walmart + ALDI → load James's list → results → swap chip → recall banner → Recalls → Deal Watch.
+ * landing → login → /plan → pick Walmart + ALDI → load Tasha's list → results → swap chip → recall banner → Recalls → Deal Watch.
  */
 test("demo journey, offline: landing → login → stores → list → trip results → swap chip → recall banner", async ({ page, context }) => {
   const blocked: string[] = [];
@@ -18,7 +18,7 @@ test("demo journey, offline: landing → login → stores → list → trip resu
   // 1. Landing → login → /plan.
   await page.goto("/");
   await page.getByRole("main").getByRole("link", { name: /Get started/ }).first().click();
-  await page.getByRole("button", { name: "Continue as James" }).click();
+  await page.getByRole("button", { name: "Continue as Tasha" }).click();
   await expect(page).toHaveURL(/\/plan$/);
 
   // 2. Pick the stores: Walmart and ALDI (checked by default). Food Lion and Target can be ticked but have no prices yet.
@@ -33,7 +33,7 @@ test("demo journey, offline: landing → login → stores → list → trip resu
   await aldi.check();
   await expect(aldi).toBeChecked();
 
-  // 3. Load James's list and match it.
+  // 3. Load Tasha's list and match it.
   await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "My List" }).click();
   await page.getByRole("button", { name: "Load my usual list" }).click();
   await page.getByRole("button", { name: "Match my list" }).click();
