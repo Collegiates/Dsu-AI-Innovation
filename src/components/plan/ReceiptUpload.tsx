@@ -9,6 +9,7 @@ import type { MatchResult } from "@/lib/matching/core";
 import { readPreference, writePreference } from "@/lib/preferences/storage";
 import { RECEIPT_NOTES, uploadReceipt } from "@/lib/receipt/client";
 import { DEFAULT_USUAL_STORE_ID } from "@/lib/trip/optimizer";
+import { markReceiptUploaded } from "./AfterReceipt";
 
 /**
  * The Dashboard's "Upload your receipt" button: sends the receipt (PDF, photo or text) to be read, matches its items
@@ -33,6 +34,7 @@ export function ReceiptUpload() {
     } catch {
       // The note is a nicety; the plan works without it.
     }
+    markReceiptUploaded();
     router.push("/trip");
   }
 

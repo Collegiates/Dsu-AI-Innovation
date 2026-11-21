@@ -1,3 +1,4 @@
+import { AfterReceipt } from "@/components/plan/AfterReceipt";
 import { StorePicker } from "@/components/plan/StorePicker";
 import type { DashboardData } from "@/lib/dashboard/data";
 import { AttentionStrip } from "./AttentionStrip";
@@ -13,11 +14,15 @@ export function DashboardView({ data }: { data: DashboardData }) {
     <div className="space-y-6">
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-7">
-          <SavingsHero trip={data.trip} itemCount={data.itemCount} />
+          <AfterReceipt>
+            <SavingsHero trip={data.trip} itemCount={data.itemCount} />
+          </AfterReceipt>
         </div>
         <div className="col-span-5 flex flex-col gap-4">
           <StorePicker stores={data.stores} pricedStoreIds={data.pricedStoreIds} columns={1} />
-          <TripCard trip={data.trip} />
+          <AfterReceipt fallbackHidden>
+            <TripCard trip={data.trip} />
+          </AfterReceipt>
         </div>
       </div>
       <AttentionStrip recall={data.recall} recallCount={data.recallCount} deals={data.deals} stores={data.stores} />

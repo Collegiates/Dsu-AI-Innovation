@@ -2,7 +2,7 @@
 
 import { ArrowRight, CircleAlert, ListChecks, Receipt, ShieldAlert, ShoppingBasket, Store as StoreIcon, Trophy } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { DataSourceNote } from "@/components/shared/DataSourceNote";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
@@ -16,6 +16,7 @@ import { usePreference } from "@/lib/preferences/usePreference";
 import { findSwaps, type Swap } from "@/lib/swaps/findSwaps";
 import { DEFAULT_USUAL_STORE_ID, optimizeTrip } from "@/lib/trip/optimizer";
 import { PlanComparison } from "./PlanComparison";
+import { SavingsOverview } from "./SavingsOverview";
 import { StopCard } from "./StopCard";
 
 const RECEIPT_NOTE_KEY = "reroute:receipt-note";
@@ -31,8 +32,8 @@ function readReceiptNote(): string | null {
 
 /**
  * The Trip Plan page's content, using only the stores the shopper picked: a "Shop at ALDI: $X" line with the other
- * stores' totals beside it, the preference switch, one card per store (with "Cheaper swap" chips and a "Whole list /
- * Only savings" switch to see just the discounted items), the cost breakdown
+ * stores' totals beside it, the preference switch, one card per store with its full grocery list (and "Cheaper swap"
+ * chips), an "Overview" popup listing exactly the discounted items, the cost breakdown
  * and a comparison of trips. It re-plans instantly in the browser whenever the stores, preference or list change.
  * Example: with Walmart and ALDI picked, "Shop at ALDI: $41.20 · Walmart only: $52.10".
  */
@@ -42,7 +43,6 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
   const { value: selectedIds, ready: storesReady } = usePreference("selectedStores");
   const { value: hiddenBrands } = usePreference("hiddenBrands");
   const { value: hiddenProducts } = usePreference("hiddenProducts");
-  const [onlySavings, setOnlySavings] = useState(false);
   const receiptNote = useSyncExternalStore(noSubscribe, readReceiptNote, () => null);
   const productsById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
   const { basket, unmatched } = useMemo(() => basketFromEntries(entries, productsById), [entries, productsById]);
@@ -232,27 +232,12 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
         <section aria-labelledby="stops-title" className="col-span-7 space-y-4">
           <div className="flex items-center justify-between">
             <h2 id="stops-title" className="font-display text-xl font-semibold">
-              {onlySavings ? "Where you save" : "What to buy"}
+              Your grocery list, by store
             </h2>
-            <div role="group" aria-label="Show items" className="inline-flex rounded-lg border bg-surface p-0.5 text-sm">
-              {[
-                { value: false, label: "Whole list" },
-                { value: true, label: "Only savings" },
-              ].map((o) => (
-                <button
-                  key={o.label}
-                  type="button"
-                  aria-pressed={onlySavings === o.value}
-                  onClick={() => setOnlySavings(o.value)}
-                  className={onlySavings === o.value ? "rounded-md bg-primary px-3 py-1 font-medium text-primary-foreground" : "rounded-md px-3 py-1 text-muted-foreground hover:text-foreground"}
-                >
-                  {o.label}
-                </button>
-              ))}
-            </div>
+            <SavingsOverview plan={plan} basket={basket} productsById={productsById} />
           </div>
           {plan.stops.map((stop, i) => (
-            <StopCard key={stop.store.id} stop={stop} number={i + 1} productsById={productsById} swapsByLine={swapsByLine} onlySavings={onlySavings} />
+            <StopCard key={stop.store.id} stop={stop} number={i + 1} productsById={productsById} swapsByLine={swapsByLine} />
           ))}
           {plan.missing.length > 0 || unmatched.length > 0 ? (
             <div role="note" aria-label="Missing items" className="flex gap-3 rounded-2xl border border-dashed bg-surface p-5">
