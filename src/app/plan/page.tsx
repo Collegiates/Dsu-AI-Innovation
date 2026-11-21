@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { DashboardView } from "@/components/dashboard/DashboardView";
+import { ReceiptUpload } from "@/components/plan/ReceiptUpload";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { RequireDemo } from "@/lib/auth/RequireDemo";
@@ -22,7 +23,7 @@ export default function DashboardPage() {
   return (
     <RequireDemo>
       <div className="space-y-6">
-        <PageHeader title="This week" description="Your weekly list, planned across the stores you pick." />
+        <PageHeader title="This week" description="Upload a receipt, and we'll find the best store for your list." actions={<ReceiptUpload />} />
         <Suspense fallback={<DashboardSkeleton />}>
           <DashboardContent />
         </Suspense>

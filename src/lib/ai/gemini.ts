@@ -125,9 +125,14 @@ export async function embedTexts(texts: string[], purpose: "query" | "document" 
  * Asks Gemini for a JSON answer and checks it against a zod schema (a written-down description of the expected shape).
  * Anything that isn't valid JSON or doesn't fit the schema is rejected, so callers never see malformed AI output.
  * When live calls are off, it returns the saved answer for "fixtureKey" from data/fixtures/generated.json, if any.
+ * An optional image (e.g. a receipt photo, as base64) is sent along with the prompt.
  * Example: generateJson(prompt, z.object({ sentence: z.string() }), { fixtureKey: "swap-1" }) → { sentence: "..." }.
  */
-export async function generateJson<T>(prompt: string, schema: z.ZodType<T>, options: { fixtureKey?: string } = {}): Promise<T> {
+export async function generateJson<T>(
+  prompt: string,
+  schema: z.ZodType<T>,
+  options: { fixtureKey?: string; image?: { mimeType: string; data: string } } = {},
+): Promise<T> {
   const mode = aiMode();
   if (!mode.live) {
     const saved = z.record(z.string(), z.unknown()).safeParse(readFixture(GENERATED_FIXTURE));
@@ -142,7 +147,7 @@ export async function generateJson<T>(prompt: string, schema: z.ZodType<T>, opti
   const response = await withTimeout((abortSignal) =>
     gemini().models.generateContent({
       model,
-      contents: prompt,
+      contents: options.image ? [{ role: "user", parts: [{ text: prompt }, { inlineData: options.image }] }] : prompt,
       config: { abortSignal, responseMimeType: "application/json", temperature: 0.2 },
     }),
   );

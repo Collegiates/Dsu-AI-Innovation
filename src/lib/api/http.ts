@@ -18,13 +18,18 @@ export function json(body: unknown, status = 200, headers: Record<string, string
 /**
  * Reads and checks a request body against a zod schema (a written description of the allowed shape and limits).
  * Returns the checked data, or a ready-made 400 response if the body is too big, not JSON, or doesn't fit.
+ * The size limit is 50,000 characters unless a route passes its own (the receipt photo route allows more).
  * Example: a list with 101 items → { ok: false, response: 400 "Invalid request." }.
  */
-export async function readBody<T>(request: Request, schema: z.ZodType<T>): Promise<{ ok: true; data: T } | { ok: false; response: Response }> {
+export async function readBody<T>(
+  request: Request,
+  schema: z.ZodType<T>,
+  maxChars: number = MAX_BODY_CHARS,
+): Promise<{ ok: true; data: T } | { ok: false; response: Response }> {
   const invalid = { ok: false as const, response: json({ error: GENERIC_ERRORS.invalid }, 400) };
   // A declared size over the limit is refused before reading anything.
-  if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_CHARS) return invalid;
-  const text = await readTextUpTo(request, MAX_BODY_CHARS);
+  if (Number(request.headers.get("content-length") ?? 0) > maxChars) return invalid;
+  const text = await readTextUpTo(request, maxChars);
   if (text === null) return invalid;
   let raw: unknown;
   try {

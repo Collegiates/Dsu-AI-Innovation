@@ -21,15 +21,14 @@ test("demo journey, offline: landing → login → stores → list → trip resu
   await page.getByRole("button", { name: "Continue as James (demo)" }).click();
   await expect(page).toHaveURL(/\/plan$/);
 
-  // 2. Pick the stores: Walmart and ALDI (checked by default); Food Lion and Target have no prices yet.
+  // 2. Pick the stores: Walmart and ALDI (checked by default). Food Lion and Target can be ticked but have no prices yet.
   const stores = page.getByRole("region", { name: "Your stores" });
   const walmart = stores.getByRole("checkbox", { name: /Walmart/ });
   const aldi = stores.getByRole("checkbox", { name: /ALDI/ });
   await expect(walmart).toBeChecked();
   await expect(aldi).toBeChecked();
-  await expect(stores.getByRole("checkbox", { name: /Food Lion/ })).toBeDisabled();
-  await expect(stores.getByRole("checkbox", { name: /Target/ })).toBeDisabled();
-  await expect(stores.getByText("Prices coming soon")).toHaveCount(2);
+  await expect(stores.getByRole("checkbox", { name: /Food Lion/ })).toBeEnabled();
+  await expect(stores.getByText("No prices yet")).toHaveCount(2);
   await aldi.uncheck();
   await aldi.check();
   await expect(aldi).toBeChecked();

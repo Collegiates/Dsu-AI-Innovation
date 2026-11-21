@@ -1,4 +1,4 @@
-# Reroute
+# ReRoute
 
 Helps a household buy its weekly groceries for less **using stores already on their daily commute**.
 Type a grocery list; the app matches it to real products, plans which store(s) to stop at on the drive home,

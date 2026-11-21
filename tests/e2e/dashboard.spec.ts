@@ -16,11 +16,11 @@ test("dashboard (/plan) loads at 1440x900 with the store picker, the savings her
   await expect(trip).toBeVisible();
   await expect(trip).not.toContainText(/\+\d+ min|gas|detour|commute/i);
 
-  // The store picker: Walmart and ALDI ticked; stores without prices can't be picked.
+  // The store picker: Walmart and ALDI ticked; Food Lion can be ticked too.
   const stores = page.getByRole("region", { name: "Your stores" });
   await expect(stores.getByRole("checkbox", { name: /Walmart/ })).toBeChecked();
   await expect(stores.getByRole("checkbox", { name: /ALDI/ })).toBeChecked();
-  await expect(stores.getByRole("checkbox", { name: /Food Lion/ })).toBeDisabled();
+  await expect(stores.getByRole("checkbox", { name: /Food Lion/ })).toBeEnabled();
   await expect(stores).toContainText("36 Jerome Dr, Dover, DE 19901");
 
   await expect(page.getByRole("region", { name: "Needs your attention" })).toBeVisible();

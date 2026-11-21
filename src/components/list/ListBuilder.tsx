@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, ListChecks, Minus, Plus, Sparkles, Tag } from "lucide-react";
+import { ArrowRight, ListChecks, Minus, Plus, Receipt, Sparkles, Tag } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Money } from "@/components/shared/Money";
 import { Button } from "@/components/ui/button";
 import { postJson } from "@/lib/api/client";
+import { RECEIPT_NOTES, uploadReceipt } from "@/lib/receipt/client";
 import { DEMO_LIST } from "@/lib/config/demo";
 import type { Product, Store } from "@/lib/data/schema";
 import { entriesFromMatches, MAX_QUANTITY, parseListText, setQuantity, type ListEntry } from "@/lib/list/list";
@@ -28,14 +29,15 @@ const HINTS: Partial<Record<ListEntry["label"], string>> = {
 };
 
 /**
- * My List: the shopper types their weekly list (or loads the demo list), the app matches each line to a real product,
+ * My List: the shopper types their weekly list (or loads the demo list, or uploads a receipt), the app matches each line to a real product,
  * and shows how sure it is. Quantities can be changed, occasional items moved to Deal Watch, and the list is saved
  * in the browser so the Trip Plan, Smart Swaps and Recalls pages use it. Example: "2% milk" → Great Value 2% milk, Same product.
  */
 export function ListBuilder({ products, stores }: { products: Product[]; stores: Store[] }) {
   const { value: entries, ready, save } = usePreference("list");
   const [draft, setDraft] = useState<string | null>(null);
-  const [status, setStatus] = useState<{ kind: "idle" | "loading" } | { kind: "error"; message: string }>({ kind: "idle" });
+  const [status, setStatus] = useState<{ kind: "idle" | "loading" | "reading" } | { kind: "error"; message: string }>({ kind: "idle" });
+  const [receiptNote, setReceiptNote] = useState<string | null>(null);
   const productsById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
   const chain = (storeId: string) => stores.find((s) => s.id === storeId)?.chain ?? storeId;
 
@@ -54,6 +56,24 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
       setStatus({ kind: "error", message: "Type at least one item, one per line or separated by commas." });
       return;
     }
+    await matchItems(items);
+  }
+
+  // Reads a receipt file (text by code, photo or PDF by AI on the server), fills the list with its items and matches them.
+  async function onReceipt(file: File | undefined) {
+    if (!file) return;
+    setStatus({ kind: "reading" });
+    const reply = await uploadReceipt(file);
+    if (!reply.ok) {
+      setStatus({ kind: "error", message: reply.message });
+      return;
+    }
+    setReceiptNote(RECEIPT_NOTES[reply.data.source]);
+    setDraft(reply.data.items.join("\n"));
+    await matchItems(reply.data.items);
+  }
+
+  async function matchItems(items: string[]) {
     setStatus({ kind: "loading" });
     const reply = await postJson<{ results: MatchResult[] }>("/api/match", { items });
     if (!reply.ok) {
@@ -104,6 +124,25 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
             Load demo list
           </Button>
         </div>
+        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed px-3 py-2.5 text-sm font-medium hover:bg-primary-soft/50 has-focus-visible:outline-2 has-focus-visible:outline-ring">
+          <Receipt aria-hidden className="size-4 text-primary" />
+          {status.kind === "reading" ? "Reading your receipt…" : "Upload a receipt"}
+          <input
+            type="file"
+            accept="image/*,application/pdf,text/plain,.txt"
+            className="sr-only"
+            disabled={status.kind === "reading" || status.kind === "loading"}
+            onChange={(e) => {
+              void onReceipt(e.target.files?.[0]);
+              e.target.value = "";
+            }}
+          />
+        </label>
+        {receiptNote ? (
+          <p role="status" className="rounded-lg bg-primary-soft px-3 py-2 text-xs text-primary">
+            {receiptNote}
+          </p>
+        ) : null}
         {status.kind === "error" ? <ErrorState title="Your list couldn't be matched" description={status.message} /> : null}
       </form>
 

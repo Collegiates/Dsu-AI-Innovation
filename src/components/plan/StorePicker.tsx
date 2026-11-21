@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * Lets the shopper tick the stores they want to shop at; the Trip Plan only uses ticked stores.
- * Each store shows its name and address. A store with no collected prices is shown but can't be ticked.
- * Example: Walmart and ALDI are ticked by default; Food Lion says "Prices coming soon".
+ * Each store shows its name and address. Any store can be ticked; one with no collected prices yet says so,
+ * and the Trip Plan skips it until its prices are added. Example: Walmart and ALDI are ticked by default; Food Lion says "No prices yet".
  */
 export function StorePicker({ stores, pricedStoreIds, columns = 4 }: { stores: Store[]; pricedStoreIds: string[]; columns?: 1 | 2 | 4 }) {
   const { value: selected, ready, save } = usePreference("selectedStores");
@@ -28,14 +28,14 @@ export function StorePicker({ stores, pricedStoreIds, columns = 4 }: { stores: S
         <legend className="sr-only">Stores to shop at</legend>
         {ordered.map((store) => {
           const hasPrices = priced.has(store.id);
-          const checked = hasPrices && ready && selected.includes(store.id);
+          const checked = ready && selected.includes(store.id);
           return (
             <label
               key={store.id}
               className={cn(
                 "flex items-start gap-3 rounded-xl border px-4",
                 columns === 1 ? "py-1.5" : "py-3",
-                hasPrices ? "cursor-pointer hover:bg-primary-soft/50" : "cursor-not-allowed opacity-60",
+                "cursor-pointer hover:bg-primary-soft/50",
                 checked && "border-primary bg-primary-soft",
               )}
             >
@@ -43,13 +43,13 @@ export function StorePicker({ stores, pricedStoreIds, columns = 4 }: { stores: S
                 type="checkbox"
                 className="mt-1 size-4 accent-primary"
                 checked={checked}
-                disabled={!hasPrices || !ready}
+                disabled={!ready}
                 onChange={(e) => toggle(store.id, e.target.checked)}
               />
               <span>
                 <span className="block font-medium">
                   {store.name}
-                  {hasPrices ? null : <span className="ml-2 text-xs font-medium text-muted-foreground">Prices coming soon</span>}
+                  {hasPrices ? null : <span className="ml-2 text-xs font-medium text-muted-foreground">No prices yet</span>}
                 </span>
                 <span className={cn("block text-muted-foreground", columns === 1 ? "text-xs" : "text-sm")}>{store.address}</span>
               </span>

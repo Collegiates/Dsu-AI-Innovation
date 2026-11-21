@@ -26,5 +26,23 @@ export const SwapsRequestSchema = z
   .strict();
 
 
+/** The largest receipt photo accepted, as base64 text (about 4 MB of image). */
+export const MAX_RECEIPT_IMAGE_CHARS = 5_600_000;
+
+/**
+ * What POST /api/receipt accepts: either receipt text (up to 10,000 characters) or one receipt photo or PDF as base64.
+ * Example: { "kind": "text", "text": "GV 2% MILK 3.46" } or { "kind": "image", "mimeType": "image/jpeg", "data": "..." }.
+ */
+export const ReceiptRequestSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("text"), text: z.string().max(10_000) }).strict(),
+  z
+    .object({
+      kind: z.literal("image"),
+      mimeType: z.enum(["image/jpeg", "image/png", "image/webp", "image/heic", "application/pdf"]),
+      data: z.string().max(MAX_RECEIPT_IMAGE_CHARS).regex(/^[A-Za-z0-9+/=]*$/),
+    })
+    .strict(),
+]);
+
 /** What POST /api/recalls accepts: the product ids on the current list (up to 100). */
 export const RecallsRequestSchema = z.object({ productIds: z.array(id).max(inputLimits.maxListItems) }).strict();

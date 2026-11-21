@@ -16,15 +16,18 @@ const butter = makeProduct("aldi-dover", "Creamy Peanut Butter", 1.65, { brand: 
 beforeEach(() => localStorage.clear());
 
 describe("Settings", () => {
-  it("shows the stores by name and address, with no detours; stores without prices can't be picked", async () => {
+  it("shows the stores by name and address, with no detours; stores without prices can be picked and say so", async () => {
     const user = userEvent.setup();
     render(<SettingsView products={[butter]} stores={stores} />);
     const picker = screen.getByRole("region", { name: "Your stores" });
     expect(picker).toHaveTextContent("10 N Dupont Hwy, Dover, DE 19901");
     expect(picker.textContent).not.toMatch(/\bmin\b|\bmi\b|detour|on your route|commute/i);
     const target = within(picker).getByRole("checkbox", { name: /Target Dover/ });
-    expect(target).toBeDisabled();
-    expect(within(picker).getByText("Prices coming soon")).toBeInTheDocument();
+    expect(target).toBeEnabled();
+    expect(within(picker).getByText("No prices yet")).toBeInTheDocument();
+    await user.click(target);
+    expect(readPreference("selectedStores")).toEqual(["walmart-dover", "aldi-dover", "target-dover"]);
+    await user.click(target);
     const aldi = within(picker).getByRole("checkbox", { name: /ALDI Dover/ });
     expect(aldi).toBeChecked();
     await user.click(aldi);

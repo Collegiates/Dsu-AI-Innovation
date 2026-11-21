@@ -18,12 +18,20 @@ export function StopCard({
   number,
   productsById,
   swapsByLine = new Map(),
+  onlySavings = false,
 }: {
   stop: PlanStop;
   number: number;
   productsById: ReadonlyMap<string, Product>;
   swapsByLine?: ReadonlyMap<number, Swap>;
+  /** Show only the items that save money (a cheaper swap or equivalent, or a sale price). */
+  onlySavings?: boolean;
 }) {
+  const savingOf = (item: PlanStop["items"][number]) => {
+    const swap = swapsByLine.get(item.basketIndex);
+    return !swap ? 0 : swap.to.id === item.product.id ? swap.savingsCents : item.checkoutCents - swap.toCents;
+  };
+  const shown = onlySavings ? stop.items.filter((i) => i.isSubstitute || savingOf(i) > 0 || i.product.salePrice !== undefined) : stop.items;
   return (
     <article aria-label={`Stop ${number}: ${stop.store.chain}`} className="rounded-2xl border bg-surface">
       <header className="flex items-center justify-between gap-4 border-b px-5 py-3.5">
@@ -42,11 +50,11 @@ export function StopCard({
         </div>
       </header>
       <ul className="divide-y px-5">
-        {stop.items.map((item) => {
+        {shown.length === 0 ? <li className="py-3 text-sm text-muted-foreground">No discounted items at this store.</li> : null}
+        {shown.map((item) => {
           const usual = productsById.get(item.usualProductId);
-          const swap = swapsByLine.get(item.basketIndex);
           // A chip when this trip buys the cheaper swap (the same saving Smart Swaps shows), or when the swap beats what it buys.
-          const swapSaving = !swap ? 0 : swap.to.id === item.product.id ? swap.savingsCents : item.checkoutCents - swap.toCents;
+          const swapSaving = savingOf(item);
           return (
             <li key={`${item.basketIndex}-${item.product.id}`} className="flex items-start justify-between gap-4 py-2">
               <div className="min-w-0">
