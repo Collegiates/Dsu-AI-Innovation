@@ -11,6 +11,7 @@ import { ErrorState } from "@/components/shared/ErrorState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Money } from "@/components/shared/Money";
 import { Button } from "@/components/ui/button";
+import { minimumWait, ProgressOverlay } from "@/components/shared/ProgressOverlay";
 import { postJson } from "@/lib/api/client";
 import { RECEIPT_NOTES, uploadReceipt } from "@/lib/receipt/client";
 import type { Product, Store } from "@/lib/data/schema";
@@ -32,6 +33,15 @@ const HINTS: Partial<Record<ListEntry["label"], string>> = {
  * and shows how sure it is. Quantities can be changed, occasional items moved to Deal Watch, and the list is saved
  * in the browser so the Trip Plan, Smart Swaps and Recalls pages use it. Example: "2% milk" → Great Value 2% milk, Same product.
  */
+// The steps shown while the list is matched. Each one names work the app really does.
+const MATCH_STEPS = [
+  "Reading your list",
+  "Finding similar products",
+  "Checking category and variant",
+  "Comparing unit prices",
+  "Labeling how sure each match is",
+] as const;
+
 export function ListBuilder({ products, stores }: { products: Product[]; stores: Store[] }) {
   const { value: entries, ready, save } = usePreference("list");
   const { value: usualList } = usePreference("usualList");
@@ -77,7 +87,9 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
 
   async function matchItems(items: string[]) {
     setStatus({ kind: "loading" });
-    const reply = await postJson<{ results: MatchResult[] }>("/api/match", { items });
+    // Matching always takes at least 5 seconds, so each progress step can be read during the demo.
+    const waited = minimumWait(MATCH_STEPS.length);
+    const [reply] = await Promise.all([postJson<{ results: MatchResult[] }>("/api/match", { items }), waited]);
     if (!reply.ok) {
       setStatus({ kind: "error", message: reply.message });
       return;
@@ -145,6 +157,7 @@ export function ListBuilder({ products, stores }: { products: Product[]; stores:
             {receiptNote}
           </p>
         ) : null}
+        {status.kind === "loading" || status.kind === "reading" ? <ProgressOverlay title="Matching your list" steps={MATCH_STEPS} /> : null}
         {status.kind === "error" ? <ErrorState title="Your list couldn't be matched" description={status.message} /> : null}
       </form>
 

@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, Loader2, Receipt } from "lucide-react";
+import { Receipt } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { minimumWait, ProgressOverlay } from "@/components/shared/ProgressOverlay";
 import { postJson } from "@/lib/api/client";
 import { entriesFromMatches } from "@/lib/list/list";
 import type { MatchResult } from "@/lib/matching/core";
@@ -25,25 +26,16 @@ const STEPS = [
   "Checking FDA food recalls",
   "Picking your best store",
 ] as const;
-const STEP_MS = 1000;
 
 export function ReceiptUpload() {
   const router = useRouter();
   const [state, setState] = useState<{ kind: "idle" | "working" } | { kind: "error"; message: string }>({ kind: "idle" });
-  const [step, setStep] = useState(0);
-  // Moves through the progress steps once a second while the plan is being prepared.
-  useEffect(() => {
-    if (state.kind !== "working") return;
-    const timer = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), STEP_MS);
-    return () => clearInterval(timer);
-  }, [state.kind]);
 
   async function onFile(file: File | undefined) {
     if (!file) return;
-    setStep(0);
     setState({ kind: "working" });
     // The upload step always takes at least 5 seconds, so each progress step can be read during the demo.
-    const minimumWait = new Promise((resolve) => setTimeout(resolve, STEPS.length * STEP_MS));
+    const waited = minimumWait(STEPS.length);
     const receipt = await uploadReceipt(file);
     if (!receipt.ok) return setState({ kind: "error", message: receipt.message });
     // When the receipt can't be read, plan the shopper's usual list from Settings (the Trip Plan says so).
@@ -57,7 +49,7 @@ export function ReceiptUpload() {
       // The note is a nicety; the plan works without it.
     }
     markReceiptUploaded();
-    await minimumWait;
+    await waited;
     router.push("/trip");
   }
 
@@ -77,27 +69,7 @@ export function ReceiptUpload() {
           }}
         />
       </label>
-      {state.kind === "working" ? (
-        <div role="status" aria-live="polite" className="fixed inset-0 z-50 grid place-items-center bg-background/80 backdrop-blur-sm">
-          <div className="w-[26rem] rounded-2xl border bg-surface p-7 shadow-sm">
-            <p className="font-display text-2xl font-semibold">Finding your best store</p>
-            <ol className="mt-5 space-y-3">
-              {STEPS.map((label, i) => (
-                <li key={label} className={i > step ? "flex items-center gap-3 text-muted-foreground/60" : "flex items-center gap-3"}>
-                  {i < step ? (
-                    <Check aria-hidden className="size-4 text-savings" />
-                  ) : i === step ? (
-                    <Loader2 aria-hidden className="size-4 animate-spin text-primary" />
-                  ) : (
-                    <span aria-hidden className="size-4 rounded-full border" />
-                  )}
-                  <span className={i === step ? "font-medium" : undefined}>{label}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      ) : null}
+      {state.kind === "working" ? <ProgressOverlay title="Finding your best store" steps={STEPS} /> : null}
       {state.kind === "error" ? (
         <p role="alert" className="text-xs text-muted-foreground">
           {state.message}
