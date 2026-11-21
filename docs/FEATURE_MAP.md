@@ -75,11 +75,11 @@ For each feature: what it does, the page URL, the code files and the test files.
 
 **What it does:** A waitlist of occasional buys (product group + optional target price). An item is a deal when the same product's price fell at least 10%, or is at or below the target; the cheapest such product per item is shown with its store and the amount saved. The "Simulate next week's prices" button applies `data/fixtures/prices-next-week.json`: **simulated** sale prices on 3 real products (toothpaste, detergent, paper towels). With the demo waitlist this gives 3 alerts and none for shampoo.
 
-**Page:** `/deals` (UI not built yet).
+**Page:** `/deals`. Each waitlist item shows today's cheapest product, its store and an optional target price (editable, saved in the browser), with a remove button. Items are added with "Move to Deal Watch" on My List or "Load demo waitlist". The clearly labeled "Simulate next week's prices" button switches to the simulated prices ("made up for the demo, not real") and highlights deals: old price struck through (only when the price really fell), new price, % less, store, and "at or under your target". A note says that in the full product prices are checked automatically and alerts are sent by email. Screenshot: `docs/screenshots/deals-1440x900.png`.
 
-**Code:** `src/lib/deals/detectDeals.ts`, `src/lib/deals/nextWeek.ts`, `src/lib/config/demo.ts` (`DEMO_WAITLIST`)
+**Code:** `src/lib/deals/detectDeals.ts`, `src/lib/deals/nextWeek.ts`, `src/lib/deals/fixture.ts` (reads and checks the simulated file), `src/lib/config/demo.ts` (`DEMO_WAITLIST`), `src/app/deals/page.tsx`, `src/components/deals/DealWatch.tsx`
 
-**Tests:** `src/lib/deals/detectDeals.test.ts`, `src/lib/deals/nextWeek.test.ts`
+**Tests:** `src/lib/deals/detectDeals.test.ts`, `src/lib/deals/nextWeek.test.ts`, `src/lib/deals/fixture.test.ts`, `src/components/deals/DealWatch.test.tsx`, `tests/e2e/deals.spec.ts`
 
 ## Saved preferences
 
