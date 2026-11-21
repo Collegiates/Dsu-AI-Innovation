@@ -54,12 +54,14 @@ let cached: Catalog | undefined;
  */
 export function loadCatalog(): Catalog {
   if (cached) return cached;
+  // GROCERYSAVE_DATA_DIR lets end-to-end tests point the app at their own test data folder.
+  const dir = process.env.GROCERYSAVE_DATA_DIR ?? "data";
   const readJson = (file: string): unknown => {
-    const path = join(process.cwd(), "data", file);
+    const path = join(process.cwd(), dir, file);
     try {
       return JSON.parse(readFileSync(path, "utf8"));
     } catch (cause) {
-      throw new Error(`Could not read data/${file}. Run "npm run import-data" to create it from data/raw/.`, { cause });
+      throw new Error(`Could not read ${dir}/${file}. Run "npm run import-data" to create it from data/raw/.`, { cause });
     }
   };
   cached = parseCatalog(readJson("stores.json"), readJson("products.json"));

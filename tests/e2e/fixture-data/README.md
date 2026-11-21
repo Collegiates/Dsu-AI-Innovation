@@ -1,0 +1,1 @@
+Test data for Playwright only (GROCERYSAVE_DATA_DIR). products.json = the real products from data/raw/. stores.json = the real stores with TEST detours, because the real detours have not been measured yet. Never used by the app itself.

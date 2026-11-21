@@ -37,6 +37,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // The demo runs on the dev server; hide Next.js's corner badge so it doesn't cover the sidebar on stage.
+  devIndicators: false,
   partialPrefetching: true,
   turbopack: {
     rules: {

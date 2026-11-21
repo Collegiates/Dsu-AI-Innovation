@@ -6,7 +6,7 @@ test("home page loads and shows the app name", async ({ page }) => {
 
   expect(response?.ok()).toBe(true);
   await expect(page).toHaveTitle(APP_NAME);
-  await expect(page.getByRole("heading", { level: 1, name: APP_NAME })).toBeVisible();
+  await expect(page.getByRole("complementary").getByRole("link", { name: APP_NAME })).toBeVisible();
 });
 
 test("home page is served with the security headers", async ({ page }) => {

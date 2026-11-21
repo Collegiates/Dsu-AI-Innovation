@@ -56,8 +56,9 @@ src/
     api/                    Server routes: match, swaps, recalls
   components/
     ui/                     shadcn/ui building blocks (buttons, cards…)
-    layout/                 Sidebar, top bar, page header
-    <feature>/              Components used by one feature only
+    layout/                 Sidebar, top bar, app shell, nav config
+    shared/                 PageHeader, StatCard, Money, ConfidenceBadge, EmptyState, ErrorState, LoadingSkeleton, DataSourceNote
+    <feature>/              Components used by one feature only (e.g. dashboard/)
   lib/
     config/                 App name, constants, assumptions (gas cost etc.)
     data/                   Loading and validating the JSON data files
@@ -78,7 +79,7 @@ data/
   fixtures/                 Cached API responses for DEMO_MODE
 scripts/                    One-off scripts (import CSV, build embeddings, group products, test report)
 tests/
-  e2e/                      Playwright tests of full user journeys
+  e2e/                      Playwright tests of full user journeys (port 3100, test data in e2e/fixture-data/)
   ai-eval/                  Golden test sets that measure AI accuracy
   security/                 Security tests
 docs/                       Evidence for judges (see "Docs" below)

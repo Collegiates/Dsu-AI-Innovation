@@ -1,14 +1,28 @@
-import { APP_NAME } from "@/lib/config/app";
+import { Suspense } from "react";
+import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import { DashboardView } from "@/components/dashboard/DashboardView";
+import { ErrorState } from "@/components/shared/ErrorState";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { getDashboardData } from "@/lib/dashboard/data";
+
+/** Loads this week's numbers and shows the three Dashboard blocks, or a plain message if the data isn't ready. */
+async function DashboardContent() {
+  const result = await getDashboardData();
+  if (!result.ok) return <ErrorState title="This week's plan isn't ready yet" description={result.message} />;
+  return <DashboardView data={result.data} />;
+}
 
 /**
- * Placeholder home page so the app runs end to end while features are built.
- * The real Dashboard (savings, recommended trip, needs-your-attention strip) replaces it in a later phase.
+ * The Dashboard (home page): this week's savings, the recommended trip, and anything that needs attention.
+ * The numbers load at request time; a skeleton shows meanwhile.
  */
-export default function Home() {
+export default function DashboardPage() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-2 p-16">
-      <h1 className="text-4xl font-semibold tracking-tight">{APP_NAME}</h1>
-      <p className="text-muted-foreground">Weekly groceries for less, on your way home.</p>
-    </main>
+    <div className="space-y-6">
+      <PageHeader title="This week" description="Your weekly list, planned around the drive home." />
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardContent />
+      </Suspense>
+    </div>
   );
 }

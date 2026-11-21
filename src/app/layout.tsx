@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
+import { AppShell } from "@/components/layout/AppShell";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { APP_NAME } from "@/lib/config/app";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// Serif display font for page titles and big numbers; clean sans for everything else.
+const display = Fraunces({ variable: "--font-display", subsets: ["latin"], weight: ["500", "600"] });
+const sans = Inter({ variable: "--font-sans", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: APP_NAME,
@@ -21,15 +16,16 @@ export const metadata: Metadata = {
 };
 
 /**
- * The frame every page sits inside: loads the fonts, sets the tab title and
- * turns on tooltips and pop-up notifications for the whole app.
+ * The frame every page sits inside: loads the fonts, sets the tab title, and draws the sidebar and top bar.
  * Example: visiting /trip renders the Trip Plan page inside this frame.
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <TooltipProvider>{children}</TooltipProvider>
+    <html lang="en" className={`${display.variable} ${sans.variable} h-full antialiased`}>
+      <body className="min-h-full">
+        <TooltipProvider>
+          <AppShell>{children}</AppShell>
+        </TooltipProvider>
         <Toaster />
       </body>
     </html>

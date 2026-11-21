@@ -22,6 +22,9 @@ export const DEMO_LIST = [
   "laundry detergent",
 ] as const;
 
+/** The weekly part of the demo list (the first 12 items); the rest are occasional buys tracked in Deal Watch. */
+export const DEMO_WEEKLY_LIST = DEMO_LIST.slice(0, 12);
+
 /**
  * The Deal Watch waitlist used in the demo: occasional buys, one with a target price.
  * With the simulated next-week prices, toothpaste and detergent drop 10%+, paper towels hit the $7.50 target,

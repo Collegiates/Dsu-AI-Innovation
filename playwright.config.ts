@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 3000;
+// Its own port, so a dev server you already have open on 3000 (with the real data) isn't reused by mistake.
+const PORT = 3100;
 const baseURL = `http://localhost:${PORT}`;
 
 /**
@@ -25,10 +26,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
+    command: `npx next dev --port ${PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    env: { DEMO_MODE: "true" },
+    // Demo mode (no internet needed) and the e2e test data folder (real products, test detours).
+    env: { DEMO_MODE: "true", GROCERYSAVE_DATA_DIR: "tests/e2e/fixture-data" },
   },
 });

@@ -72,3 +72,13 @@ For each feature: what it does, the page URL, the code files and the test files.
 **What it does:** Typed helpers that save hidden brands, hidden products, the Deal Watch waitlist and the trip preference in the browser's localStorage. Every value is checked with zod on read and write; if storage is blocked, full or corrupted, the defaults are used and nothing crashes. Nothing sensitive is stored.
 
 **Code:** `src/lib/preferences/storage.ts` · **Tests:** `src/lib/preferences/storage.test.ts`
+
+## Dashboard and app shell
+
+**What it does:** The home page shows exactly three blocks. (1) **Savings hero:** this week's optimized total vs. the typical total (usual products at the usual store, gas included), the savings in dollars and percent, and "View trip plan". (2) **Recommended trip:** a drawing of the commute (DSU → Home) with a pin per store, the chosen stop(s) with subtotals, extra minutes and gas. (3) **Needs your attention:** at most one possible recall and the top two Deal Watch items, each linking to its page. Every number comes from the real optimizer, recall matcher and Deal Watch code. The demo list is matched to the usual store's products by the matching code. The sidebar links to every page; the top bar shows the page title and the commute. Screenshot: `docs/screenshots/dashboard-1440x900.png` (e2e test data: real prices, test detours).
+
+**Page:** `/`
+
+**Code:** `src/app/page.tsx`, `src/lib/dashboard/data.ts`, `src/lib/trip/demoBasket.ts`, `src/components/dashboard/` (SavingsHero, TripCard, CommuteLine, AttentionStrip, DashboardView, DashboardSkeleton), `src/components/layout/` (AppShell, Sidebar, TopBar, nav), `src/components/shared/` (PageHeader, StatCard, Money, ConfidenceBadge, EmptyState, ErrorState, LoadingSkeleton, DataSourceNote), design tokens in `src/app/globals.css`
+
+**Tests:** `src/components/dashboard/DashboardView.test.tsx`, `src/components/shared/Money.test.tsx`, `src/components/shared/ConfidenceBadge.test.tsx`, `tests/e2e/dashboard.spec.ts`, `tests/e2e/smoke.spec.ts`
