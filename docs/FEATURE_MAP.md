@@ -17,6 +17,7 @@ For each feature: what it does, the page URL, the code files and the test files.
 | Dashboard | This week's savings, the recommended trip, and what needs attention. | `/plan` | `src/app/plan/page.tsx`, `src/lib/dashboard/data.ts`, `src/components/dashboard/` | `src/components/dashboard/DashboardView.test.tsx`, `tests/e2e/dashboard.spec.ts` |
 | Landing page and demo login | Public home page and a one-click demo login. | `/`, `/login` | `src/components/landing/`, `src/app/login/`, `src/lib/auth/` | `src/components/landing/LandingPage.test.tsx`, `src/lib/auth/*.test.ts*`, `tests/e2e/landing.spec.ts` |
 | Full demo journey | The live demo script end to end, with the internet blocked. | all | — | `tests/e2e/demo-journey.spec.ts` |
+| MCP connector | Private, read-only MCP interface for ChatGPT over OpenAI Secure MCP Tunnel (`search_catalog`, `list_stores`, `match_grocery_items`, `plan_grocery_trip`). | `npm run mcp` | `src/mcp/server.ts`, `scripts/mcp-server.ts`, `docs/MCP_CONNECTOR.md` | `src/mcp/server.test.ts` |
 
 **Nov 21 change: stores instead of a commute.** Shoppers tick their stores on `/plan` (`src/components/plan/StorePicker.tsx`, saved as `selectedStores`; Walmart + ALDI by default, stores without prices disabled). Detours are optional (blank → `null`, never 0); with null detours a trip costs groceries + 10 min × the preference's time value per extra store, with no gas (`src/lib/trip/optimizer.ts`, tests incl. `regression: null detours never produce NaN or $0 totals`). `/trip` opens with "Shop at ALDI: $X" beside each other store's own total, "Cheaper swap: save $X" chips linking to `/swaps`, and a past-purchase recall banner; `/recalls` shows that national FDA recall (H-1380-2026, lot 6040 01-6) as a labeled hypothetical past purchase (`src/components/recalls/PastPurchaseRecall.tsx`, facts in `DEMO_PAST_PURCHASE_RECALL`). All commute, detour and gas text is gone from the app; the parts of the sections below that mention them are out of date. Full journey: `tests/e2e/demo-journey.spec.ts`.
 
@@ -138,3 +139,13 @@ Details for each feature follow.
 **Code:** `src/app/page.tsx`, `src/components/landing/` (LandingPage, Hero, CommuteAnimation, HowItWorks, StatsBand, TrustSection, FooterCta, LandingHeader, CountUp, Reveal, storeLogos), `src/app/login/page.tsx`, `src/app/login/DemoLoginCard.tsx`, `src/lib/auth/demo.ts`, `src/lib/auth/RequireDemo.tsx`, `src/components/layout/AppShell.tsx` (hides the sidebar on `/` and `/login`)
 
 **Tests:** `src/components/landing/LandingPage.test.tsx`, `src/app/login/DemoLoginCard.test.tsx`, `src/lib/auth/demo.test.ts`, `src/lib/auth/RequireDemo.test.tsx`, `tests/e2e/landing.spec.ts`, `tests/e2e/dashboard.spec.ts`
+
+## MCP connector
+
+**What it does:** Offers a private, read-only MCP interface for OpenAI clients over Secure MCP Tunnel. `search_catalog` and `list_stores` expose the checked catalog and store data; `match_grocery_items` uses the existing matcher; `plan_grocery_trip` matches a supplied list and runs the same deterministic trip optimizer. Trip preference is required because the connector cannot read browser preferences. Unmatched items are reported without a price, and price-source context accompanies results.
+
+**Run:** `npm run mcp` starts the stdio server for `tunnel-client`. Setup and ChatGPT connection steps: `docs/MCP_CONNECTOR.md`.
+
+**Code:** `src/mcp/server.ts`, `scripts/mcp-server.ts`, `src/lib/matching/match.ts`, `src/lib/trip/optimizer.ts`
+
+**Tests:** `src/mcp/server.test.ts`, `src/lib/matching/match.test.ts`, `src/lib/trip/optimizer.test.ts`

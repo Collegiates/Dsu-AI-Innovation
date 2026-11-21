@@ -1,5 +1,5 @@
 {
-  "name": "grocerysave",
+  "name": "reroute",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,10 +15,12 @@
     "check": "npm run typecheck && npm run lint && npm run test && npm run eval && npm run test:security",
     "report": "tsx scripts/test-report.ts",
     "import-data": "tsx scripts/import-csv.ts",
-    "build-embeddings": "tsx --conditions=react-server scripts/build-embeddings.ts"
+    "build-embeddings": "tsx --conditions=react-server scripts/build-embeddings.ts",
+    "mcp": "tsx --conditions=react-server scripts/mcp-server.ts"
   },
   "dependencies": {
     "@google/genai": "^3.6.1",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
     "lucide-react": "^1.77.0",

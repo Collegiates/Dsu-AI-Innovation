@@ -69,5 +69,6 @@ npm run report
 - `docs/TESTING.md`: test commands, counts and regression tests
 - `docs/JUDGE_QA.md`: likely questions and where to point
 - `docs/SLIDES_BACKUP.md`: four backup slides (AI validation, testing, security, architecture)
+- `docs/MCP_CONNECTOR.md`: private ChatGPT MCP connector and OpenAI Secure MCP Tunnel setup (`npm run mcp`)
 
 Built with Next.js 16, TypeScript, Tailwind CSS, shadcn/ui, zod, Gemini (`@google/genai`), Vitest and Playwright.
