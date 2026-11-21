@@ -53,11 +53,13 @@ For each feature: what it does, the page URL, the code files and the test files.
 
 **What it does:** For each list item, finds the cheapest similar product (same category and product family) from a different brand that is cheaper per unit **and** cheaper at the register for the amount needed, skipping hidden brands and products. Savings are computed by code. Gemini writes a one-sentence explanation from those facts only; the validator rejects any sentence with a wrong amount or percentage, an outside brand or store, HTML, or more than 25 words, and a template sentence is used instead. Explanations are cached by swap id.
 
-**API:** `POST /api/swaps` with `{ "basket": [{ "usualProductId": "..." }], "hiddenBrands": [], "hiddenProducts": [] }`. Page: `/swaps` (UI not built yet).
+**API:** `POST /api/swaps` with `{ "basket": [{ "usualProductId": "..." }], "hiddenBrands": [], "hiddenProducts": [] }`. Page: `/swaps`.
 
-**Code:** `src/lib/swaps/findSwaps.ts`, `src/lib/ai/explainSwap.ts`, `src/lib/ai/validators.ts`, `src/app/api/swaps/route.ts`
+**Page:** one row per swap for the saved list: what you buy → what to try instead (size, store, price, unit price), the weekly saving in $ and %, and the explanation sentence, labeled "AI-written, numbers checked" or "written from the computed numbers". "Try it" puts the suggestion on the list (undo toast). "Never show again" offers this product or the whole brand; the row disappears at once with an undo toast, and the list is re-checked with the hidden brands/products. "How we chose this" shows the category, the unit-price comparison and the list match confidence. A link goes to Settings to manage hidden brands. Screenshot: `docs/screenshots/swaps-1440x900.png`.
 
-**Tests:** `src/lib/swaps/findSwaps.test.ts`, `src/lib/ai/explainSwap.test.ts`, `src/lib/ai/validators.test.ts`, `tests/security/api-routes.test.ts`
+**Code:** `src/lib/swaps/findSwaps.ts`, `src/lib/ai/explainSwap.ts`, `src/lib/ai/validators.ts`, `src/app/api/swaps/route.ts`, `src/app/swaps/page.tsx`, `src/components/swaps/SwapsView.tsx`
+
+**Tests:** `src/lib/swaps/findSwaps.test.ts`, `src/lib/ai/explainSwap.test.ts`, `src/lib/ai/validators.test.ts`, `tests/security/api-routes.test.ts`, `src/components/swaps/SwapsView.test.tsx`, `tests/e2e/swaps.spec.ts`
 
 ## Recalls & Safety
 
