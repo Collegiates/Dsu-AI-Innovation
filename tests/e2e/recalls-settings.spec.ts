@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { DEMO_FLAG_KEY } from "../../src/lib/auth/demo";
 
 test("Recalls & Safety: checks the list against FDA recalls and says when and from where", async ({ page }) => {
   await page.goto("/recalls");
@@ -23,6 +24,8 @@ test("Recalls & Safety: checks the list against FDA recalls and says when and fr
 });
 
 test("Settings: shows the route and stores, saves the default preference, and un-hides brands", async ({ page }) => {
+  // Settings needs the demo login.
+  await page.addInitScript((key) => localStorage.setItem(key, "true"), DEMO_FLAG_KEY);
   await page.goto("/settings");
   const stores = page.getByRole("region", { name: "Stores on your route" });
   await expect(stores.getByText("Walmart", { exact: true })).toBeVisible();

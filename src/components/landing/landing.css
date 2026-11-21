@@ -1,0 +1,182 @@
+/*
+ * Landing page motion, in plain CSS (no animation library). Every class starts with "landing-" so nothing else is affected.
+ * Timeline for the hero drawing: the route draws from DSU to Home (0–1.9s), store pins pop in as the line
+ * reaches them, then one pin turns green and the "$4.21 saved" tag appears (from 2.3s).
+ * Everything sits in its final state when the visitor asks for reduced motion.
+ */
+
+.landing-route {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 1.9s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards;
+}
+
+.landing-endpoint {
+  opacity: 0;
+  animation: fade 0.5s ease-out forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+.landing-pin {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform: scale(0);
+  animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+.landing-pin-head {
+  fill: var(--surface);
+  stroke: var(--primary);
+}
+
+.landing-pin-win .landing-pin-head {
+  animation: win 0.4s ease-out 2.3s forwards;
+}
+
+.landing-pin-win .landing-pin-dot {
+  animation: winDot 0.4s ease-out 2.3s forwards;
+}
+
+.landing-pin-dot {
+  fill: var(--primary);
+}
+
+.landing-ripple {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  fill: var(--savings);
+  animation: ripple 2.4s ease-out 2.4s infinite;
+}
+
+.landing-tag {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  opacity: 0;
+  transform: translateY(8px) scale(0.9);
+  animation: tag 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 2.5s forwards;
+}
+
+.landing-hero-text > * {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.landing-hero-text > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.landing-hero-text > *:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.landing-hero-text > *:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+/* Scroll reveal: sections start in place; Reveal.tsx hides them only when JavaScript runs and they are off-screen. */
+.landing-reveal {
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--delay, 0s);
+}
+
+.landing-reveal[data-reveal="hidden"] {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes win {
+  to {
+    fill: var(--savings);
+    stroke: var(--savings);
+  }
+}
+
+@keyframes winDot {
+  to {
+    fill: var(--surface);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+@keyframes tag {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-route,
+  .landing-endpoint,
+  .landing-pin,
+  .landing-tag,
+  .landing-hero-text > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    stroke-dashoffset: 0;
+  }
+
+  .landing-pin-win .landing-pin-head {
+    animation: none;
+    fill: var(--savings);
+    stroke: var(--savings);
+  }
+
+  .landing-pin-win .landing-pin-dot {
+    animation: none;
+    fill: var(--surface);
+  }
+
+  .landing-ripple {
+    animation: none;
+  }
+
+  .landing-reveal,
+  .landing-reveal[data-reveal="hidden"] {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}
