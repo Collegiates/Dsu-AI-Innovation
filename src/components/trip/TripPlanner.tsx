@@ -14,10 +14,11 @@ import { assumptions, COMMUTE } from "@/lib/config/app";
 import type { Product, Store } from "@/lib/data/schema";
 import { basketFromEntries } from "@/lib/list/list";
 import { usePreference } from "@/lib/preferences/usePreference";
+import { detourText } from "@/lib/trip/detour";
 import { DEFAULT_USUAL_STORE_ID, optimizeTrip } from "@/lib/trip/optimizer";
 import { cn } from "@/lib/utils";
 import { PlanComparison } from "./PlanComparison";
-import { detourText, StopCard } from "./StopCard";
+import { StopCard } from "./StopCard";
 
 /**
  * The Trip Plan page's content: the trip preference switch, the commute drawing with the chosen stops, one card per

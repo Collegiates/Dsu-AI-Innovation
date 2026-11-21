@@ -1,13 +1,17 @@
-import { Hammer } from "lucide-react";
-import { EmptyState } from "@/components/shared/EmptyState";
+import { Suspense } from "react";
+import { SettingsView } from "@/components/settings/SettingsView";
+import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { WithCatalog } from "@/components/shared/WithCatalog";
 
-/** Settings page. Its logic is built and tested in src/lib/; the screen itself is the next build step. */
-export default function Page() {
+/** Settings page: the commute, the stores on it, the default trip preference, and hidden brands and products. */
+export default function SettingsPage() {
   return (
     <div className="space-y-6">
-      <PageHeader title="Settings" description="Your route, stores and hidden brands." />
-      <EmptyState icon={Hammer} title="This page is being built" description="The logic behind it is done and tested; the screen comes next." />
+      <PageHeader title="Settings" description="Your route, the stores on it, and what you've hidden." />
+      <Suspense fallback={<LoadingSkeleton className="h-96" />}>
+        <WithCatalog>{({ products, stores }) => <SettingsView products={products} stores={stores} />}</WithCatalog>
+      </Suspense>
     </div>
   );
 }

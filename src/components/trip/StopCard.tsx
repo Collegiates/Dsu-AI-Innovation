@@ -2,12 +2,8 @@ import { ArrowLeftRight, Info } from "lucide-react";
 import { Money } from "@/components/shared/Money";
 import type { Product } from "@/lib/data/schema";
 import { formatSize } from "@/lib/pricing/money";
+import { detourText } from "@/lib/trip/detour";
 import type { PlanStop } from "@/lib/trip/optimizer";
-
-/** "On your route" for a store with no detour, otherwise "+4 min · 1.2 mi". */
-export function detourText(store: { detourMinutes: number; detourMiles: number }): string {
-  return store.detourMinutes === 0 && store.detourMiles === 0 ? "On your route" : `+${store.detourMinutes} min · ${store.detourMiles} mi`;
-}
 
 /**
  * One stop on the trip: the store, how far off the route it is, every item to buy there, and the bill.

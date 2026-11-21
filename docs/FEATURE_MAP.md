@@ -65,11 +65,13 @@ For each feature: what it does, the page URL, the code files and the test files.
 
 **What it does:** Checks the products on the list against FDA food recalls from the last 12 months (openFDA, the FDA's public data service). A product is flagged only when the recall's product description contains its **brand** (whole phrase) **and** at least one **key product word** (whole word, ignoring describing words like "fat", "fresh", "frozen"). Every match shows the recall number, reason, class, date and recalling firm, and is always labeled "Possible match — check the lot code on your package". The live API has a 5-second timeout; in demo mode, on timeout, or offline, a saved real response (`data/fixtures/recalls.json`, 1,000 records, trimmed to the fields used) is used. Malformed records are skipped and counted.
 
-**API:** `POST /api/recalls` with `{ "productIds": [...] }`. Page: `/recalls` (UI not built yet).
+**API:** `POST /api/recalls` with `{ "productIds": [...] }`.
 
-**Code:** `src/lib/recalls/openfda.ts`, `src/lib/recalls/schema.ts`, `src/lib/recalls/match.ts`, `src/app/api/recalls/route.ts`
+**Page:** `/recalls`. "Check my list now" sends the list's products plus the equivalents the trip might buy instead. Each possible match shows the product, reason, classification, report date, recall number, recalling firm, a link to the FDA record (openFDA, by recall number) and the "check the lot code" message, in the recall red (the only place red is used). The page says when it last checked, against how many recalls, and whether the data was live or the saved copy. No matches gives a calm "No possible matches". Screenshot: `docs/screenshots/recalls-1440x900.png`.
 
-**Tests:** `src/lib/recalls/match.test.ts`, `src/lib/recalls/schema.test.ts`, `src/lib/recalls/openfda.test.ts`, `tests/security/api-routes.test.ts`
+**Code:** `src/lib/recalls/openfda.ts`, `src/lib/recalls/schema.ts`, `src/lib/recalls/match.ts`, `src/app/api/recalls/route.ts`, `src/app/recalls/page.tsx`, `src/components/recalls/RecallsView.tsx`
+
+**Tests:** `src/lib/recalls/match.test.ts`, `src/lib/recalls/schema.test.ts`, `src/lib/recalls/openfda.test.ts`, `tests/security/api-routes.test.ts`, `src/components/recalls/RecallsView.test.tsx`, `tests/e2e/recalls-settings.spec.ts`
 
 ## Deal Watch
 
@@ -80,6 +82,16 @@ For each feature: what it does, the page URL, the code files and the test files.
 **Code:** `src/lib/deals/detectDeals.ts`, `src/lib/deals/nextWeek.ts`, `src/lib/deals/fixture.ts` (reads and checks the simulated file), `src/lib/config/demo.ts` (`DEMO_WAITLIST`), `src/app/deals/page.tsx`, `src/components/deals/DealWatch.tsx`
 
 **Tests:** `src/lib/deals/detectDeals.test.ts`, `src/lib/deals/nextWeek.test.ts`, `src/lib/deals/fixture.test.ts`, `src/components/deals/DealWatch.test.tsx`, `tests/e2e/deals.spec.ts`
+
+## Settings
+
+**What it does:** Shows the demo commute (read-only), the stores on it nearest first with their detour and how it was measured, the default trip preference (the same switch as the Trip Plan, saved in the browser), and the brands and products hidden from Smart Swaps, each with a "Show … again" button. Screenshot: `docs/screenshots/settings-1440x900.png`.
+
+**Page:** `/settings`
+
+**Code:** `src/app/settings/page.tsx`, `src/components/settings/SettingsView.tsx`, `src/components/shared/PreferencePicker.tsx`, `src/lib/trip/detour.ts`
+
+**Tests:** `src/components/settings/SettingsView.test.tsx`, `src/lib/trip/detour.test.ts`, `tests/e2e/recalls-settings.spec.ts`
 
 ## Saved preferences
 
