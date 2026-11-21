@@ -4,7 +4,7 @@ import { comparisonPrice, neededAmount, type BasketItem } from "@/lib/trip/baske
 
 /**
  * A cheaper similar product suggested in place of one the shopper usually buys. All numbers are computed by code.
- * Example: usual "Pantene Shampoo" $6.35 → swap "Equate Dandruff Shampoo" $2.84, saving 351 cents (55%).
+ * Example: usual "Great Value 2% Reduced Fat Milk" $3.46 → swap "Friendly Farms 2% Reduced Fat Milk" $2.99, saving 47 cents (14%).
  */
 export type Swap = {
   /** Stable id, used to cache the explanation and to hide this swap. Example: "aldi-dover--a--x->walmart-dover--b--y". */
@@ -40,6 +40,8 @@ const lower = (s: string) => s.trim().toLowerCase();
 /**
  * For each item on the list, finds the cheapest similar product from a different brand that costs less per unit
  * AND less at the register for the amount needed, skipping any brand or product the shopper hid.
+ * "Similar" means the same product family AND the same variant, so a swap changes the brand, never the flavor or type
+ * (plain yogurt is never swapped for vanilla, whole wheat bread never for white). Package sizes may differ.
  * Deterministic: the same list always gives the same swaps. Items with nothing cheaper get no swap.
  * Example: usual Great Value creamy peanut butter ($1.98) → Peanut Delight creamy ($1.65) at Aldi.
  */
@@ -66,7 +68,7 @@ export function findSwaps(input: {
     for (const to of input.products) {
       if (to.id === from.id || lower(to.brand) === lower(from.brand)) continue;
       if (hiddenBrands.has(lower(to.brand)) || hiddenProducts.has(to.id)) continue;
-      if (productFamily(to) !== productFamily(from)) continue;
+      if (productFamily(to) !== productFamily(from) || lower(to.variant) !== lower(from.variant)) continue;
       const toUnit = comparisonPrice(to);
       if (!toUnit || toUnit.per !== fromUnit.per || toUnit.value >= fromUnit.value) continue;
       const toCost = checkoutCost(needed, to);

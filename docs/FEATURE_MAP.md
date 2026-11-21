@@ -51,7 +51,7 @@ For each feature: what it does, the page URL, the code files and the test files.
 
 ## Smart Swaps
 
-**What it does:** For each list item, finds the cheapest similar product (same category and product family) from a different brand that is cheaper per unit **and** cheaper at the register for the amount needed, skipping hidden brands and products. Savings are computed by code. Gemini writes a one-sentence explanation from those facts only; the validator rejects any sentence with a wrong amount or percentage, an outside brand or store, HTML, or more than 25 words, and a template sentence is used instead. Explanations are cached by swap id.
+**What it does:** For each list item, finds the cheapest similar product (same product family **and the same variant**, so plain yogurt is never swapped for vanilla or whole wheat bread for white; sizes may differ) from a different brand that is cheaper per unit **and** cheaper at the register for the amount needed, skipping hidden brands and products. Savings are computed by code. Gemini writes a one-sentence explanation from those facts only; the validator rejects any sentence with a wrong amount or percentage, an outside brand or store, HTML, or more than 25 words, and a template sentence is used instead. Explanations are cached by swap id.
 
 **API:** `POST /api/swaps` with `{ "basket": [{ "usualProductId": "..." }], "hiddenBrands": [], "hiddenProducts": [] }`. Page: `/swaps`.
 

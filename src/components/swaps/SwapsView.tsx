@@ -33,7 +33,7 @@ const unitLabel = (unit: string) => (unit === "load" ? "load" : unit);
  * Smart Swaps: one row per cheaper similar product for items on the saved list, with unit prices, the weekly saving and
  * a one-sentence explanation (AI-written only if it passed every check, otherwise a template). "Try it" puts the
  * suggestion on the list; "Never show again" hides that product or its whole brand, with an undo.
- * Example: Pantene shampoo $6.35 → Equate dandruff shampoo $2.84, save $3.51 a week.
+ * Example: Great Value 2% milk $3.46 → Friendly Farms 2% milk $2.99 at ALDI, save $0.47 a week.
  */
 export function SwapsView({ products, stores }: { products: Product[]; stores: Store[] }) {
   const { value: entries, ready: listReady, save: saveList } = usePreference("list");

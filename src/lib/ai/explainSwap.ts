@@ -7,7 +7,7 @@ import { SwapExplanationSchema, validateSwapExplanation, type KnownNames, type S
 
 /**
  * Collects the exact facts about a swap that Gemini is allowed to use, all computed by code.
- * Example: { fromName: "Pantene Pro-V Shampoo", toStore: "Walmart", savings: "$3.51", savingsPercent: 55, ... }.
+ * Example: { fromName: "Great Value 2% Reduced Fat Milk", toStore: "ALDI", savings: "$0.47", savingsPercent: 14, ... }.
  */
 export function swapFacts(swap: Swap, storesById: ReadonlyMap<string, Store>): SwapFacts {
   const storeName = (id: string) => storesById.get(id)?.chain ?? id;
@@ -27,7 +27,7 @@ export function swapFacts(swap: Swap, storesById: ReadonlyMap<string, Store>): S
 
 /**
  * The fixed sentence used whenever the AI sentence is unavailable or fails a check. Always correct, because code fills it in.
- * Example: "Switch to Equate Dandruff Shampoo at Walmart and save $3.51 (55%) compared with Pantene Pro-V Shampoo."
+ * Example: "Switch to Friendly Farms 2% Reduced Fat Milk at ALDI and save $0.47 (14%) compared with Great Value 2% Reduced Fat Milk."
  */
 export function templateExplanation(f: SwapFacts): string {
   return `Switch to ${f.toName} at ${f.toStore} and save ${f.savings} (${f.savingsPercent}%) compared with ${f.fromName}.`;
