@@ -12,7 +12,8 @@ import "./landing.css";
 export function Hero() {
   return (
     <section aria-labelledby="hero-title" className="relative overflow-hidden">
-      <CommuteAnimation className="pointer-events-none absolute right-[3%] bottom-4 w-[90%] max-w-[1320px] select-none" />
+      <CommuteAnimation className="pointer-events-none absolute right-[3%] bottom-8 w-[90%] max-w-[1320px] select-none" />
+      <p className="absolute right-[4%] bottom-3 text-xs text-muted-foreground">Illustration</p>
       <div className="landing-hero-text relative mx-auto flex min-h-[calc(100vh-4.5rem)] max-w-6xl flex-col px-10 pt-20 pb-64">
         <p className="text-sm font-semibold tracking-wide text-primary uppercase">Groceries, planned around your commute</p>
         <h1 id="hero-title" className="mt-4 max-w-2xl font-display text-6xl leading-[1.05] font-semibold tracking-tight">

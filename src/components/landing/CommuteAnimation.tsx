@@ -1,27 +1,58 @@
-import { pinPoint, routePath, ROUTE } from "./geometry";
 import "./landing.css";
+import { pinPoint, routePath, ROUTE } from "./geometry";
+import { ALDI, FOOD_LION, TARGET, WALMART, type StoreMark } from "./storeLogos";
 
-// Store pins along the route: which curve, how far along, and when each pops in (as the line reaches it).
-const PINS = [
-  { segment: 1, t: 0.42, delay: 0.75 },
-  { segment: 2, t: 0.12, delay: 1.25 },
-  { segment: 2, t: 0.5, delay: 1.6, win: true },
-  { segment: 2, t: 0.82, delay: 1.9 },
-] as const;
+// Store pins in route order (nearest detour first, as in the app), where each sits on the line and when it pops in.
+const PINS: { store: StoreMark; segment: 1 | 2; t: number; delay: number; best?: boolean }[] = [
+  { store: WALMART, segment: 1, t: 0.42, delay: 0.75 },
+  { store: ALDI, segment: 2, t: 0.12, delay: 1.2, best: true },
+  { store: TARGET, segment: 2, t: 0.42, delay: 1.5 },
+  { store: FOOD_LION, segment: 2, t: 0.7, delay: 1.8 },
+];
 
-/** The amount shown on the winning pin. Marketing illustration only; the app's real numbers come from the optimizer. */
-export const HERO_SAVING = "$4.21 saved";
+/** The weekly saving shown at the Home end. Marketing illustration only (about $219 a year); the app's numbers come from code. */
+export const HERO_SAVING = { amount: "$4.21 a week", label: "saved with smart swaps" } as const;
+
+const BADGE_RADIUS = 27;
+const BADGE_LIFT = 54; // how far above the route each badge's center sits
+const LOGO_SIZE = 32;
+
+function StoreBadge({ store, x, y }: { store: StoreMark; x: number; y: number }) {
+  const cy = y - BADGE_LIFT;
+  return (
+    <>
+      <line x1={x} y1={y} x2={x} y2={cy + BADGE_RADIUS} stroke="var(--border)" strokeWidth={3} strokeLinecap="round" />
+      <circle cx={x} cy={y} r={5} fill="var(--primary)" />
+      <circle cx={x} cy={cy} r={BADGE_RADIUS} strokeWidth={3} className="landing-badge" />
+      {"path" in store ? (
+        <svg x={x - LOGO_SIZE / 2} y={cy - LOGO_SIZE / 2} width={LOGO_SIZE} height={LOGO_SIZE} viewBox={store.viewBox ?? "0 0 24 24"} overflow="hidden">
+          <path d={store.path} fill={store.color} />
+        </svg>
+      ) : (
+        <text x={x} y={cy + 6.5} textAnchor="middle" fill={store.color} fontSize={18} fontWeight={800} letterSpacing={0.5} fontFamily="var(--font-sans)">
+          {store.letters}
+        </text>
+      )}
+    </>
+  );
+}
 
 /**
- * The hero's moving picture: the commute line draws itself from DSU to Home, store pins pop up along it,
- * and one pin turns green with a "$4.21 saved" tag. It's pure SVG and CSS, and holds still for reduced motion.
- * Decorative: the headline says the same thing in words, so screen readers get one short description.
+ * The hero's moving picture: the commute line draws itself from DSU to Home, a logo badge pops up for each store
+ * along it, the best stop (ALDI) gets a green ring and a "Best stop" chip, and a weekly-savings callout appears at Home.
+ * Pure SVG and CSS; it holds still for reduced motion. Labeled an illustration on the page.
  */
 export function CommuteAnimation({ className }: { className?: string }) {
   const path = routePath();
-  const end = ROUTE.second[2];
+  const home = ROUTE.second[2];
+  const stores = PINS.map((p) => p.store.name).join(", ");
   return (
-    <svg viewBox="0 0 1200 600" role="img" aria-label="A drive from DSU to Home with grocery stores along the way; one stop is marked $4.21 saved." className={className}>
+    <svg
+      viewBox="0 0 1200 600"
+      role="img"
+      aria-label={`Illustration: a drive from DSU to Home past ${stores}. ALDI is marked as the best stop. ${HERO_SAVING.amount} ${HERO_SAVING.label}.`}
+      className={className}
+    >
       <defs>
         <pattern id="landing-dots" width="28" height="28" patternUnits="userSpaceOnUse">
           <circle cx="2" cy="2" r="1.4" fill="var(--border)" />
@@ -33,6 +64,9 @@ export function CommuteAnimation({ className }: { className?: string }) {
         <mask id="landing-mask">
           <rect width="1200" height="600" fill="url(#landing-fade)" />
         </mask>
+        <filter id="landing-shadow" x="-20%" y="-20%" width="140%" height="160%">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#1e2a22" floodOpacity="0.12" />
+        </filter>
       </defs>
       <rect width="1200" height="600" fill="url(#landing-dots)" mask="url(#landing-mask)" />
 
@@ -43,7 +77,7 @@ export function CommuteAnimation({ className }: { className?: string }) {
 
       {[
         { p: ROUTE.start, label: "DSU", delay: 0.1, anchor: "start" as const, dx: -6 },
-        { p: end, label: "Home", delay: 2.0, anchor: "end" as const, dx: 6 },
+        { p: home, label: "Home", delay: 2.1, anchor: "end" as const, dx: 6 },
       ].map(({ p, label, delay, anchor, dx }) => (
         <g key={label} className="landing-endpoint" style={{ "--delay": `${delay}s` } as React.CSSProperties}>
           <circle cx={p.x} cy={p.y} r={13} fill="var(--foreground)" />
@@ -56,30 +90,37 @@ export function CommuteAnimation({ className }: { className?: string }) {
 
       {PINS.map((pin) => {
         const { x, y } = pinPoint(pin.segment, pin.t);
-        const isWin = "win" in pin && pin.win;
+        const cy = y - BADGE_LIFT;
         return (
-          <g key={`${pin.segment}-${pin.t}`}>
-            {isWin ? <circle cx={x} cy={y} r={14} className="landing-ripple" /> : null}
-            <g className={`landing-pin ${isWin ? "landing-pin-win" : ""}`} style={{ "--delay": `${pin.delay}s` } as React.CSSProperties}>
-              <path
-                d={`M ${x} ${y} C ${x - 4} ${y - 14}, ${x - 18} ${y - 22}, ${x - 18} ${y - 38} A 18 18 0 1 1 ${x + 18} ${y - 38} C ${x + 18} ${y - 22}, ${x + 4} ${y - 14}, ${x} ${y} Z`}
-                strokeWidth={3}
-                className="landing-pin-head"
-              />
-              <circle cx={x} cy={y - 38} r={6.5} className="landing-pin-dot" />
+          <g key={pin.store.name}>
+            {pin.best ? <circle cx={x} cy={cy} r={BADGE_RADIUS} className="landing-ripple" /> : null}
+            <g className={`landing-pin ${pin.best ? "landing-pin-best" : ""}`} style={{ "--delay": `${pin.delay}s` } as React.CSSProperties} filter="url(#landing-shadow)">
+              <StoreBadge store={pin.store} x={x} y={y} />
             </g>
-            {isWin ? (
-              <g className="landing-tag">
-                <rect x={x - 82} y={y - 118} width={164} height={50} rx={25} fill="var(--savings)" />
-                <path d={`M ${x - 9} ${y - 69} L ${x} ${y - 60} L ${x + 9} ${y - 69} Z`} fill="var(--savings)" />
-                <text x={x} y={y - 86} textAnchor="middle" fill="white" fontSize={23} fontWeight={700} fontFamily="var(--font-sans)">
-                  {HERO_SAVING}
+            {pin.best ? (
+              <g className="landing-tag" style={{ "--delay": "2.5s" } as React.CSSProperties}>
+                <rect x={x - 56} y={cy - 74} width={112} height={34} rx={17} fill="var(--savings)" />
+                <path d={`M ${x - 7} ${cy - 41} L ${x} ${cy - 34} L ${x + 7} ${cy - 41} Z`} fill="var(--savings)" />
+                <text x={x} y={cy - 51} textAnchor="middle" fill="white" fontSize={17} fontWeight={700} fontFamily="var(--font-sans)">
+                  Best stop
                 </text>
               </g>
             ) : null}
           </g>
         );
       })}
+
+      {/* The weekly saving, at the Home end of the drive: it belongs to the whole trip, not to one store. */}
+      <g className="landing-tag" style={{ "--delay": "2.4s" } as React.CSSProperties} filter="url(#landing-shadow)">
+        <rect x={home.x - 228} y={12} width={256} height={80} rx={18} fill="var(--savings)" />
+        <path d={`M ${home.x - 8} 91 L ${home.x} 101 L ${home.x + 8} 91 Z`} fill="var(--savings)" />
+        <text x={home.x - 206} y={48} fill="white" fontSize={28} fontWeight={700} fontFamily="var(--font-sans)">
+          {HERO_SAVING.amount}
+        </text>
+        <text x={home.x - 206} y={74} fill="white" fillOpacity={0.9} fontSize={17} fontFamily="var(--font-sans)">
+          {HERO_SAVING.label}
+        </text>
+      </g>
     </svg>
   );
 }

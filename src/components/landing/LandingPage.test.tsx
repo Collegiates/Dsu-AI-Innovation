@@ -21,9 +21,14 @@ describe("landing page", () => {
     expect(screen.getAllByText(APP_NAME).length).toBeGreaterThan(0);
   });
 
-  it("describes the animated drawing in words, including the highlighted saving", () => {
+  it("describes the drawing in words, marks ALDI as the best stop, and keeps the saving off every store pin", () => {
     render(<LandingPage />);
-    expect(screen.getByRole("img", { name: /DSU to Home .* \$4\.21 saved/ })).toBeInTheDocument();
+    const drawing = screen.getByRole("img", { name: /^Illustration: a drive from DSU to Home past Walmart, ALDI, Target, Food Lion/ });
+    expect(drawing).toHaveAccessibleName(/ALDI is marked as the best stop\. \$4\.21 a week saved with smart swaps\./);
+    expect(within(drawing).getByText("Best stop")).toBeInTheDocument();
+    // The saving is one callout for the whole trip, not a label on a store.
+    expect(within(drawing).getAllByText("$4.21 a week")).toHaveLength(1);
+    expect(screen.getByText("Illustration")).toBeInTheDocument();
   });
 
   it("shows the three steps in order", () => {

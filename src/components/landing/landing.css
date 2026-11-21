@@ -1,7 +1,7 @@
 /*
  * Landing page motion, in plain CSS (no animation library). Every class starts with "landing-" so nothing else is affected.
- * Timeline for the hero drawing: the route draws from DSU to Home (0–1.9s), store pins pop in as the line
- * reaches them, then one pin turns green and the "$4.21 saved" tag appears (from 2.3s).
+ * Timeline for the hero drawing: the route draws from DSU to Home (0–2.1s), store logo badges pop in as the line
+ * reaches them, then the best stop's ring turns green with a "Best stop" chip, and the savings callout appears at Home.
  * Everything sits in its final state when the visitor asks for reduced motion.
  */
 
@@ -25,21 +25,13 @@
   animation-delay: var(--delay, 0s);
 }
 
-.landing-pin-head {
+.landing-badge {
   fill: var(--surface);
-  stroke: var(--primary);
+  stroke: var(--border);
 }
 
-.landing-pin-win .landing-pin-head {
-  animation: win 0.4s ease-out 2.3s forwards;
-}
-
-.landing-pin-win .landing-pin-dot {
-  animation: winDot 0.4s ease-out 2.3s forwards;
-}
-
-.landing-pin-dot {
-  fill: var(--primary);
+.landing-pin-best .landing-badge {
+  animation: best 0.4s ease-out 2.3s forwards;
 }
 
 .landing-ripple {
@@ -55,7 +47,8 @@
   transform-origin: 50% 100%;
   opacity: 0;
   transform: translateY(8px) scale(0.9);
-  animation: tag 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 2.5s forwards;
+  animation: tag 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: var(--delay, 2.5s);
 }
 
 .landing-hero-text > * {
@@ -107,16 +100,9 @@
   }
 }
 
-@keyframes win {
+@keyframes best {
   to {
-    fill: var(--savings);
     stroke: var(--savings);
-  }
-}
-
-@keyframes winDot {
-  to {
-    fill: var(--surface);
   }
 }
 
@@ -158,15 +144,9 @@
     stroke-dashoffset: 0;
   }
 
-  .landing-pin-win .landing-pin-head {
+  .landing-pin-best .landing-badge {
     animation: none;
-    fill: var(--savings);
     stroke: var(--savings);
-  }
-
-  .landing-pin-win .landing-pin-dot {
-    animation: none;
-    fill: var(--surface);
   }
 
   .landing-ripple {
