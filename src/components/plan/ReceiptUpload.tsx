@@ -24,6 +24,8 @@ export function ReceiptUpload() {
   async function onFile(file: File | undefined) {
     if (!file) return;
     setState({ kind: "working" });
+    // The upload step always takes at least 5 seconds, so the progress messages can be read during the demo.
+    const minimumWait = new Promise((resolve) => setTimeout(resolve, 5000));
     const receipt = await uploadReceipt(file);
     if (!receipt.ok) return setState({ kind: "error", message: receipt.message });
     // When the receipt can't be read, plan the shopper's usual list from Settings (the Trip Plan says so).
@@ -37,6 +39,7 @@ export function ReceiptUpload() {
       // The note is a nicety; the plan works without it.
     }
     markReceiptUploaded();
+    await minimumWait;
     router.push("/trip");
   }
 
