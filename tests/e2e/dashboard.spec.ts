@@ -21,7 +21,7 @@ test("dashboard loads at 1440x900 with the savings hero, the trip block and the 
   const attentionBox = await page.getByRole("region", { name: "Needs your attention" }).boundingBox();
   expect(attentionBox && attentionBox.y + attentionBox.height).toBeLessThanOrEqual(900);
 
-  if (process.env.SCREENSHOT_PATH) await page.screenshot({ path: process.env.SCREENSHOT_PATH, fullPage: false });
+  if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.SCREENSHOT_DIR}/dashboard-1440x900.png` });
 });
 
 test("sidebar links to every page, and the current page is marked", async ({ page }) => {

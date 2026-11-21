@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { hideBrand, hideProduct, readPreference, writePreference } from "./storage";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { addToWaitlist, hideBrand, hideProduct, PREFERENCES_EVENT, readPreference, writePreference } from "./storage";
 
 beforeEach(() => localStorage.clear());
 
@@ -51,5 +51,25 @@ describe("saved preferences", () => {
     expect(hideBrand(" great value ")).toEqual(["Great Value"]);
     hideProduct("p1");
     expect(hideProduct("p1")).toEqual(["p1"]);
+  });
+
+  it("saves the shopping list and tells open pages that it changed", () => {
+    const listener = vi.fn();
+    window.addEventListener(PREFERENCES_EVENT, listener);
+    const list = [{ text: "milk", quantity: 2, label: "Same product" as const, productId: "walmart-dover--milk" }];
+    expect(writePreference("list", list)).toBe(true);
+    expect(readPreference("list")).toEqual(list);
+    expect(listener).toHaveBeenCalledTimes(1);
+    window.removeEventListener(PREFERENCES_EVENT, listener);
+  });
+
+  it("returns an empty list when the saved list has a bad line", () => {
+    localStorage.setItem("grocerysave:list", JSON.stringify([{ text: "milk", quantity: -1, label: "Same product", productId: null }]));
+    expect(readPreference("list")).toEqual([]);
+  });
+
+  it("adds a group to the waitlist only once", () => {
+    addToWaitlist("toothpaste-fluoride-whitening");
+    expect(addToWaitlist("toothpaste-fluoride-whitening")).toEqual([{ groupKey: "toothpaste-fluoride-whitening" }]);
   });
 });

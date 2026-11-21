@@ -31,11 +31,21 @@ For each feature: what it does, the page URL, the code files and the test files.
 
 **What it does:** Turns messy list text ("2 gal milk", "yougurt", "the cheap bread") into catalog products. Three steps: embeddings find the 5 closest products by meaning → code keeps only the top product's category and separates variants → code sorts interchangeable products by unit price. Each line gets a label: "Same product", "Similar" (check it) or "No match". With no Gemini key, no saved embeddings, or no internet, it falls back to keyword matching (word overlap that tolerates small typos). The typed text is compared as data only; it never goes into an AI prompt.
 
-**API:** `POST /api/match` with `{ "items": ["2 gal milk", ...] }`. Page: `/list` (UI not built yet).
+**API:** `POST /api/match` with `{ "items": ["2 gal milk", ...] }`. Page: `/list` (see My List below).
 
 **Code:** `src/lib/matching/match.ts` (server entry), `src/lib/matching/core.ts` (embedding + keyword matching, labels, filters), `src/lib/matching/text.ts` (word normalization, typo tolerance), `src/lib/matching/embeddings.ts`, `src/lib/ai/gemini.ts`, `scripts/build-embeddings.ts`, `src/app/api/match/route.ts`
 
 **Tests:** `src/lib/matching/core.test.ts`, `tests/ai-eval/matching.eval.test.ts` (golden set), `tests/security/api-routes.test.ts`
+
+## My List
+
+**What it does:** The shopper types the weekly list (one per line or comma-separated) or presses "Load demo list", then "Match my list". The page calls `POST /api/match` and shows each line with the matched real product (size, store, price) and a confidence badge: "Same product", "Similar" (with "check it's what you usually buy") or "No match" (with a hint). Each line has a quantity stepper (1–20) and "Move to Deal Watch" for occasional buys (it adds the product group to the waitlist and takes the line off the list). The list is saved in the browser (checked with zod) and feeds the Trip Plan, Smart Swaps and Recalls pages. "Build my trip plan" goes to `/trip`. Screenshot: `docs/screenshots/list-1440x900.png`.
+
+**Page:** `/list`
+
+**Code:** `src/app/list/page.tsx`, `src/components/list/ListBuilder.tsx`, `src/lib/list/list.ts` (parsing typed text, choosing the usual store's product, quantities → basket), `src/lib/preferences/usePreference.ts` (saved list shared by every page), `src/lib/api/client.ts`, `src/components/shared/WithCatalog.tsx`
+
+**Tests:** `src/components/list/ListBuilder.test.tsx`, `src/lib/list/list.test.ts`, `src/lib/api/client.test.ts`, `tests/e2e/list.spec.ts`
 
 ## Smart Swaps
 
@@ -69,9 +79,9 @@ For each feature: what it does, the page URL, the code files and the test files.
 
 ## Saved preferences
 
-**What it does:** Typed helpers that save hidden brands, hidden products, the Deal Watch waitlist and the trip preference in the browser's localStorage. Every value is checked with zod on read and write; if storage is blocked, full or corrupted, the defaults are used and nothing crashes. Nothing sensitive is stored.
+**What it does:** Typed helpers that save the shopping list, hidden brands, hidden products, the Deal Watch waitlist and the trip preference in the browser's localStorage. Every save notifies open pages, so a change on one page shows up on the others at once. Every value is checked with zod on read and write; if storage is blocked, full or corrupted, the defaults are used and nothing crashes. Nothing sensitive is stored.
 
-**Code:** `src/lib/preferences/storage.ts` · **Tests:** `src/lib/preferences/storage.test.ts`
+**Code:** `src/lib/preferences/storage.ts`, `src/lib/preferences/usePreference.ts` · **Tests:** `src/lib/preferences/storage.test.ts`
 
 ## Dashboard and app shell
 
@@ -79,6 +89,6 @@ For each feature: what it does, the page URL, the code files and the test files.
 
 **Page:** `/`
 
-**Code:** `src/app/page.tsx`, `src/lib/dashboard/data.ts`, `src/lib/trip/demoBasket.ts`, `src/components/dashboard/` (SavingsHero, TripCard, CommuteLine, AttentionStrip, DashboardView, DashboardSkeleton), `src/components/layout/` (AppShell, Sidebar, TopBar, nav), `src/components/shared/` (PageHeader, StatCard, Money, ConfidenceBadge, EmptyState, ErrorState, LoadingSkeleton, DataSourceNote), design tokens in `src/app/globals.css`
+**Code:** `src/app/page.tsx`, `src/lib/dashboard/data.ts`, `src/lib/trip/demoBasket.ts`, `src/components/dashboard/` (SavingsHero, TripCard, AttentionStrip, DashboardView, DashboardSkeleton), `src/components/layout/` (AppShell, Sidebar, TopBar, nav), `src/components/shared/` (PageHeader, StatCard, Money, ConfidenceBadge, EmptyState, ErrorState, LoadingSkeleton, DataSourceNote, CommuteLine, WithCatalog), design tokens in `src/app/globals.css`
 
 **Tests:** `src/components/dashboard/DashboardView.test.tsx`, `src/components/shared/Money.test.tsx`, `src/components/shared/ConfidenceBadge.test.tsx`, `tests/e2e/dashboard.spec.ts`, `tests/e2e/smoke.spec.ts`

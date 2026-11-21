@@ -67,3 +67,20 @@ export function loadCatalog(): Catalog {
   cached = parseCatalog(readJson("stores.json"), readJson("products.json"));
   return cached;
 }
+
+/** The message pages show when the data files are missing or invalid. */
+export const CATALOG_NOT_READY =
+  "The store and price data hasn't been imported yet. Measure each store's detour, then run npm run import-data.";
+
+/**
+ * Like loadCatalog, but returns a plain-language message instead of throwing, so a page can show it calmly.
+ * The real error is logged on the server for the team. Example: { ok: false, message: CATALOG_NOT_READY }.
+ */
+export function tryLoadCatalog(): { ok: true; catalog: Catalog } | { ok: false; message: string } {
+  try {
+    return { ok: true, catalog: loadCatalog() };
+  } catch (error) {
+    console.error("[data] catalog unavailable", error);
+    return { ok: false, message: CATALOG_NOT_READY };
+  }
+}

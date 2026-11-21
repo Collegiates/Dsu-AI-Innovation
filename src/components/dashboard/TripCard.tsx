@@ -3,7 +3,7 @@ import { Money } from "@/components/shared/Money";
 import { COMMUTE } from "@/lib/config/app";
 import type { Store } from "@/lib/data/schema";
 import type { TripResult } from "@/lib/trip/optimizer";
-import { CommuteLine } from "./CommuteLine";
+import { CommuteLine } from "@/components/shared/CommuteLine";
 
 /**
  * The recommended trip in brief: a drawing of the commute with the chosen stop(s), each stop's bill,

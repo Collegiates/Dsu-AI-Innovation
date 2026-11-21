@@ -57,7 +57,7 @@ src/
   components/
     ui/                     shadcn/ui building blocks (buttons, cards…)
     layout/                 Sidebar, top bar, app shell, nav config
-    shared/                 PageHeader, StatCard, Money, ConfidenceBadge, EmptyState, ErrorState, LoadingSkeleton, DataSourceNote
+    shared/                 PageHeader, StatCard, Money, ConfidenceBadge, EmptyState, ErrorState, LoadingSkeleton, DataSourceNote, CommuteLine, WithCatalog
     <feature>/              Components used by one feature only (e.g. dashboard/)
   lib/
     config/                 App name, constants, assumptions (gas cost etc.)
@@ -69,7 +69,8 @@ src/
     swaps/                  Swap candidate selection + explanation checks
     recalls/                openFDA client + recall-to-product matching
     deals/                  Waitlist price-drop detection
-    preferences/            localStorage read/write (hidden brands, waitlist)
+    list/                   The saved shopping list: parsing typed text, quantities, list → basket
+    preferences/            localStorage read/write (list, hidden brands, waitlist) + usePreference hook
 data/
   raw/                      Source CSVs from the data person (stores, products, price-audit); `npm run import-data` turns them into the JSON below
   stores.json               Stores on the demo commute, with detour times

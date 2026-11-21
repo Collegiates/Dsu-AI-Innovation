@@ -2,7 +2,7 @@ import "server-only";
 import { connection } from "next/server";
 import type { TripPreference } from "@/lib/config/app";
 import { DEMO_WAITLIST, DEMO_WEEKLY_LIST } from "@/lib/config/demo";
-import { loadCatalog } from "@/lib/data/load";
+import { tryLoadCatalog } from "@/lib/data/load";
 import type { Store } from "@/lib/data/schema";
 import { detectDeals, type Deal } from "@/lib/deals/detectDeals";
 import { matchRecalls, type RecallMatch } from "@/lib/recalls/match";
@@ -30,14 +30,9 @@ export type DashboardData = {
 export async function getDashboardData(preference: TripPreference = "balanced"): Promise<{ ok: true; data: DashboardData } | { ok: false; message: string }> {
   // Wait for a real request, so prices and recalls are read when the page is opened, not frozen at build time.
   await connection();
-  let catalog;
-  try {
-    catalog = loadCatalog();
-  } catch (error) {
-    console.error("[dashboard] catalog unavailable", error);
-    return { ok: false, message: "The store and price data hasn't been imported yet. Measure each store's detour, then run npm run import-data." };
-  }
-  const { products, stores, productsById } = catalog;
+  const loaded = tryLoadCatalog();
+  if (!loaded.ok) return loaded;
+  const { products, stores, productsById } = loaded.catalog;
   const { basket, unmatched } = basketFromList(DEMO_WEEKLY_LIST, products, DEFAULT_USUAL_STORE_ID);
   const trip = optimizeTrip({ basket, products, stores, preference, usualStoreId: DEFAULT_USUAL_STORE_ID });
 
