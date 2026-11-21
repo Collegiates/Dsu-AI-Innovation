@@ -47,7 +47,16 @@ export function SavingsHero({ ranking, itemCount }: { ranking: StoreRanking; ite
             <div className="flex items-baseline justify-between text-sm">
               <dt className={q === winner ? "font-semibold" : "text-muted-foreground"}>
                 {q.store.chain}
-                {q.missing > 0 ? <span className="font-normal text-muted-foreground"> · {q.missing} items not sold there</span> : null}
+                <span className="font-normal text-muted-foreground">
+                  {" "}
+                  · {q.items} items
+                  {q !== winner && q.winnerCentsForSameItems !== null ? (
+                    <>
+                      {" "}
+                      (same items at {winner?.store.chain}: <Money cents={q.winnerCentsForSameItems} />)
+                    </>
+                  ) : null}
+                </span>
               </dt>
               <dd className="font-medium">
                 <Money cents={q.totalCents} />

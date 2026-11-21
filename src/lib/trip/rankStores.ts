@@ -3,7 +3,15 @@ import type { BasketItem } from "./basket";
 import { optimizeTrip, type TripPlan } from "./optimizer";
 
 /** One store's whole-list price: the trip if the shopper buys everything there. */
-export type StoreQuote = { store: Store; plan: TripPlan; totalCents: number; missing: number };
+export type StoreQuote = {
+  store: Store;
+  plan: TripPlan;
+  totalCents: number;
+  missing: number;
+  /** How many list items this store sells, and what the winner charges for those same items (like-for-like). */
+  items: number;
+  winnerCentsForSameItems: number | null;
+};
 
 /** The best single store for this week's list, every store's quote, and what the winner saves. */
 export type StoreRanking = {
@@ -23,12 +31,20 @@ export function rankStores(basket: readonly BasketItem[], products: readonly Pro
   const quotes = stores
     .map((store) => {
       const plan = optimizeTrip({ basket, products, stores: [store], preference: "maxSavings" }).recommended;
-      return { store, plan, totalCents: plan.checkoutTotalCents, missing: plan.missing.length };
+      return { store, plan, totalCents: plan.checkoutTotalCents, missing: plan.missing.length, items: plan.stops.flatMap((s) => s.items).length, winnerCentsForSameItems: null as number | null };
     })
     .filter((q) => q.plan.stops.length > 0)
     .sort((a, b) => a.missing - b.missing || a.totalCents - b.totalCents || a.store.id.localeCompare(b.store.id));
 
   const [winner, runnerUp] = quotes;
+  // For every other store, the winner's price on exactly the items that store sells.
+  if (winner) {
+    const winnerCost = new Map(winner.plan.stops.flatMap((s) => s.items).map((i) => [i.basketIndex, i.checkoutCents]));
+    for (const q of quotes.slice(1)) {
+      const lines = q.plan.stops.flatMap((s) => s.items).filter((i) => winnerCost.has(i.basketIndex));
+      q.winnerCentsForSameItems = lines.reduce((sum, i) => sum + winnerCost.get(i.basketIndex)!, 0);
+    }
+  }
   let savings: StoreRanking["savings"] = null;
   if (winner && runnerUp) {
     const cost = (plan: TripPlan) => new Map(plan.stops.flatMap((s) => s.items).map((i) => [i.basketIndex, i.checkoutCents]));

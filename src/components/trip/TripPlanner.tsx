@@ -157,11 +157,15 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
               <span>{q.store.chain}</span>
               <span className="text-right">
                 <Money cents={q.totalCents} />
-                {q.missing > 0 ? (
-                  <span className="block text-xs font-normal text-muted-foreground">
-                    {q.missing} item{q.missing > 1 ? "s" : ""} not sold there
-                  </span>
-                ) : null}
+                <span className="block text-xs font-normal text-muted-foreground">
+                  {q.items} item{q.items === 1 ? "" : "s"}
+                  {q !== winner && q.winnerCentsForSameItems !== null ? (
+                    <>
+                      {" "}
+                      · same items at {winner?.store.chain}: <Money cents={q.winnerCentsForSameItems} />
+                    </>
+                  ) : null}
+                </span>
               </span>
             </li>
           ))}
@@ -182,7 +186,14 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
             </h2>
             <SavingsOverview plan={winner!.plan} basket={basket} productsById={productsById} />
           </div>
-          <StopCard stop={stop} number={1} productsById={productsById} swapsByLine={swapsByLine} />
+          <StopCard
+            stop={stop}
+            number={1}
+            productsById={productsById}
+            swapsByLine={swapsByLine}
+            basket={basket}
+            storeNames={new Map(stores.map((st) => [st.id, st.chain]))}
+          />
           {winner!.plan.missing.length > 0 || unmatched.length > 0 ? (
             <div role="note" aria-label="Missing items" className="flex gap-3 rounded-2xl border border-dashed bg-surface p-5">
               <CircleAlert aria-hidden className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
