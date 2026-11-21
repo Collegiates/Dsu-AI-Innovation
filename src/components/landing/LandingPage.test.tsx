@@ -40,7 +40,7 @@ describe("landing page", () => {
   it("shows each stat with its final value and names the sources, labeling the demo estimate as illustrative", () => {
     render(<LandingPage />);
     const stats = screen.getByRole("region", { name: "By the numbers" });
-    for (const text of ["32.6%", "88%", "$219"]) expect(within(stats).getAllByText(text).length).toBeGreaterThan(0);
+    for (const text of ["32.6%", "88%", "$350"]) expect(within(stats).getAllByText(text).length).toBeGreaterThan(0);
     expect(stats).toHaveTextContent(/USDA Economic Research Service/);
     expect(stats).toHaveTextContent(/Axonify/);
     expect(stats).toHaveTextContent(/illustrative/);
@@ -55,7 +55,7 @@ describe("landing page", () => {
 describe("count-up numbers", () => {
   it("formats numbers the same way while counting and at the end", () => {
     expect(formatStat(32.6, { decimals: 1, suffix: "%" })).toBe("32.6%");
-    expect(formatStat(219, { prefix: "$" })).toBe("$219");
+    expect(formatStat(350, { prefix: "$" })).toBe("$350");
     expect(formatStat(1234.5, { decimals: 1 })).toBe("1,234.5");
   });
 

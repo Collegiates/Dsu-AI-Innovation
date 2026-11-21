@@ -10,7 +10,7 @@ const PINS: { store: StoreMark; segment: 1 | 2; t: number; delay: number; best?:
   { store: FOOD_LION, segment: 2, t: 0.7, delay: 1.8 },
 ];
 
-/** The weekly saving shown at the Home end. Marketing illustration only (about $219 a year); the app's numbers come from code. */
+/** The weekly saving shown at the Home end. Marketing illustration only (about $350 a year); the app's numbers come from code. */
 export const HERO_SAVING = { amount: "$4.21 a week", label: "saved with smart swaps" } as const;
 
 const BADGE_RADIUS = 27;
