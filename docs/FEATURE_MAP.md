@@ -2,6 +2,24 @@
 
 For each feature: what it does, the page URL, the code files and the test files.
 
+| Feature | What it does | Page URL | Code files | Test files |
+|---|---|---|---|---|
+| Trip optimizer | Picks which store(s) on the commute to stop at and what to buy at each, weighing savings against gas and time. Pure code. | `/trip` | `src/lib/trip/optimizer.ts`, `src/lib/trip/basket.ts`, `src/components/trip/` | `src/lib/trip/optimizer.test.ts`, `src/lib/trip/basket.test.ts`, `src/components/trip/TripPlanner.test.tsx`, `tests/e2e/trip.spec.ts` |
+| Pricing | Unit prices, sale prices, packages needed, exact-cent money formatting. | (all pages) | `src/lib/pricing/price.ts`, `src/lib/pricing/money.ts` | `src/lib/pricing/price.test.ts`, `src/lib/pricing/money.test.ts` |
+| Data import | Turns the data person's CSVs into checked JSON; refuses blank detours and unaudited prices. | `npm run import-data` | `src/lib/data/import.ts`, `src/lib/data/load.ts`, `scripts/import-csv.ts` | `src/lib/data/import.test.ts`, `src/lib/data/load.test.ts` |
+| AI list matching | Messy list text → real products with a "Same product" / "Similar" / "No match" label. | `/list`, `POST /api/match` | `src/lib/matching/`, `src/lib/ai/gemini.ts`, `src/app/api/match/route.ts` | `src/lib/matching/core.test.ts`, `tests/ai-eval/`, `tests/security/api-routes.test.ts` |
+| My List | Enter the list, see matches, set quantities, move occasional buys to Deal Watch. | `/list` | `src/components/list/ListBuilder.tsx`, `src/lib/list/list.ts` | `src/components/list/ListBuilder.test.tsx`, `src/lib/list/list.test.ts`, `tests/e2e/list.spec.ts` |
+| Smart Swaps | Cheaper same-variant products; code computes savings, AI writes a checked sentence; "never show again". | `/swaps`, `POST /api/swaps` | `src/lib/swaps/findSwaps.ts`, `src/lib/ai/explainSwap.ts`, `src/lib/ai/validators.ts`, `src/components/swaps/SwapsView.tsx` | `src/lib/swaps/findSwaps.test.ts`, `src/lib/ai/explainSwap.test.ts`, `src/lib/ai/validators.test.ts`, `tests/e2e/swaps.spec.ts` |
+| Recalls & Safety | Checks the list against FDA food recalls (live openFDA, saved copy offline); "possible match" only. | `/recalls`, `POST /api/recalls` | `src/lib/recalls/`, `src/components/recalls/RecallsView.tsx` | `src/lib/recalls/*.test.ts`, `src/components/recalls/RecallsView.test.tsx`, `tests/e2e/recalls-settings.spec.ts` |
+| Deal Watch | Waitlist of occasional buys; flags 10%+ drops or target prices; clearly labeled simulated next week. | `/deals` | `src/lib/deals/`, `src/components/deals/DealWatch.tsx` | `src/lib/deals/*.test.ts`, `src/components/deals/DealWatch.test.tsx`, `tests/e2e/deals.spec.ts` |
+| Settings | Route, stores and detours, default trip preference, hidden brands/products. | `/settings` | `src/components/settings/SettingsView.tsx`, `src/lib/trip/detour.ts` | `src/components/settings/SettingsView.test.tsx`, `src/lib/trip/detour.test.ts`, `tests/e2e/recalls-settings.spec.ts` |
+| Saved preferences | List, hidden brands, waitlist and preference in localStorage, checked with zod. | (all pages) | `src/lib/preferences/` | `src/lib/preferences/storage.test.ts` |
+| Dashboard | This week's savings, the recommended trip, and what needs attention. | `/plan` | `src/app/plan/page.tsx`, `src/lib/dashboard/data.ts`, `src/components/dashboard/` | `src/components/dashboard/DashboardView.test.tsx`, `tests/e2e/dashboard.spec.ts` |
+| Landing page and demo login | Public home page and a one-click demo login. | `/`, `/login` | `src/components/landing/`, `src/app/login/`, `src/lib/auth/` | `src/components/landing/LandingPage.test.tsx`, `src/lib/auth/*.test.ts*`, `tests/e2e/landing.spec.ts` |
+| Full demo journey | The live demo script end to end, with the internet blocked. | all | — | `tests/e2e/demo-journey.spec.ts` |
+
+Details for each feature follow.
+
 ## Trip optimizer
 
 **What it does:** Takes the weekly list (the products the shopper usually buys) and decides which store(s) on the commute to stop at and what to buy at each. It tries every group of 1 to 5 stores, buys each item at the cheapest store in that group (only swapping to a product with the same group and variant), and scores each trip as groceries + gas + the shopper's time valued by their preference (fastest / balanced / maxSavings). Trips that get every item win first. It returns the recommended trip, the cheapest single-store trip and the fastest trip, each with savings against the usual products at the usual store. Items no store carries are listed as missing, never priced at $0. Pure code, no AI.

@@ -4,6 +4,17 @@ Every place AI is used, how its output is checked, and the latest eval accuracy.
 
 **Rule:** code does the math, AI does the language. AI never produces a number the user sees unless code has checked it.
 
+**Why AI never does the math:** language models can write a confident wrong number, and a wrong price or saving would break the app's one promise. So every price, unit price, total, saving, percentage and trip choice is computed in plain TypeScript with unit tests, and the AI only gets those numbers as facts to repeat. If it changes one, the sentence is thrown away.
+
+**Checks applied to every AI answer:**
+
+| Check | Matching (embeddings) | Swap explanations |
+|---|---|---|
+| Schema (zod) | Response must have one vector per text, none empty | Must be JSON `{ "sentence": "..." }` |
+| Catalog ID check | The AI returns no IDs: code computes similarity against catalog products only, so a non-catalog product can't appear | The AI picks nothing: code chooses the swap; the sentence may not name a brand or store outside the facts |
+| Number check | No numbers from AI reach the user (similarity only decides the label) | Every $ amount and % must equal a computed value |
+| Fallback | Keyword matching | Template sentence |
+
 ## Where AI is used
 
 | Use | AI does | Code checks | If AI fails or is off |
@@ -18,11 +29,11 @@ All Gemini calls go through `src/lib/ai/gemini.ts` (`import "server-only"`), hav
 
 ## Eval
 
-`npm run eval` runs `tests/ai-eval/matching.eval.test.ts` against `tests/ai-eval/golden-matches.json` (26 messy inputs: typos, vague items, a non-grocery item, a grocery item the stores don't carry, and a prompt-injection line). It fails below 90%.
+`npm run eval` runs `tests/ai-eval/matching.eval.test.ts` against `tests/ai-eval/golden-matches.json` (27 messy inputs: typos, vague items, a non-grocery item, a grocery item the stores don't carry, and a prompt-injection line). It fails below 90%.
 
 - Mode is chosen automatically: live Gemini with `EVAL_LIVE=true`, saved embeddings when `data/embeddings.json` and the query fixtures exist, otherwise the keyword fallback.
 - Vague inputs ("the cheap bread", "paper towels", "laundry detergent", "creamy peanut butter") accept any of the listed equally-right groups.
 
-**Latest result (Nov 21, 2026): 100% (26/26), keyword fallback mode, on the 55 real products.** Embedding mode has not been measured yet because there is no Gemini key; run `npm run build-embeddings` then `EVAL_LIVE=true npm run eval` once the key is in `.env.local`, and tune the thresholds if needed.
+**Latest result (Nov 21, 2026): 100% (27/27), keyword fallback mode, on the 55 real products.** Embedding mode has not been measured yet because there is no Gemini key; run `npm run build-embeddings` then `EVAL_LIVE=true npm run eval` once the key is in `.env.local`, and tune the thresholds if needed.
 
 Honesty note: the golden set was written while the keyword matcher was being built, so the keyword score is optimistic. The embedding score, once measured, is the more independent check.
