@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 import { aiConfig } from "@/lib/config/app";
+import { createQuotaPacer } from "./quota";
 
 /** Why the app could not get an answer from Gemini, so the fallback can say why in the logs. */
 export type AiFailureReason =
@@ -12,6 +13,7 @@ export type AiFailureReason =
   | "no-model"
   | "no-fixture"
   | "timeout"
+  | "rate-limited"
   | "api-error"
   | "invalid-response";
 
@@ -39,6 +41,23 @@ export function aiMode(env: Record<string, string | undefined> = process.env): {
   if (env.DEMO_MODE === "true") return { live: false, reason: "demo-mode" };
   if (!env.GEMINI_API_KEY) return { live: false, reason: "no-key" };
   return { live: true };
+}
+
+/** How many embedding requests run at the same time. */
+const EMBED_CONCURRENCY = 4;
+/** Tries per text when Gemini says "too many requests", and the wait before the next try (grows each time). */
+const EMBED_MAX_ATTEMPTS = 5;
+const EMBED_RETRY_MS = 8000;
+
+// One pacer per kind of call, shared by every request this server handles.
+const embedQuota = createQuotaPacer({ limit: aiConfig.embedRequestsPerMinute, windowMs: 60_000 });
+const generateQuota = createQuotaPacer({ limit: aiConfig.generateRequestsPerMinute, windowMs: 60_000 });
+
+/** Waits for a free slot under our own Gemini limit, or gives up with "rate-limited" so the caller uses its fallback. */
+async function takeQuotaSlot(pacer: ReturnType<typeof createQuotaPacer>, maxWaitMs: number): Promise<void> {
+  if (!(await pacer.acquire(maxWaitMs))) {
+    throw new AiUnavailableError("rate-limited", "Over our own Gemini per-minute limit; using the fallback");
+  }
 }
 
 let client: GoogleGenAI | undefined;
@@ -89,8 +108,13 @@ function readFixture(file: string): unknown | undefined {
  * That lets "2 gal milk" find "2% Reduced Fat Milk" even with different words.
  * Uses Gemini when live; otherwise the saved fixture, and throws AiUnavailableError if a text isn't saved.
  * Example: embedTexts(["2% milk"]) → [[0.012, -0.03, ...]].
+ * Stays under our per-minute Gemini limit: waits up to maxQuotaWaitMs for a slot, then gives up with "rate-limited".
  */
-export async function embedTexts(texts: string[], purpose: "query" | "document" = "query"): Promise<number[][]> {
+export async function embedTexts(
+  texts: string[],
+  purpose: "query" | "document" = "query",
+  options: { maxQuotaWaitMs?: number } = {},
+): Promise<number[][]> {
   if (texts.length === 0) return [];
   const mode = aiMode();
   if (!mode.live) {
@@ -107,15 +131,31 @@ export async function embedTexts(texts: string[], purpose: "query" | "document" 
   const model = process.env.GEMINI_EMBED_MODEL;
   if (!model) throw new AiUnavailableError("no-model", "GEMINI_EMBED_MODEL is not set");
 
-  const response = await withTimeout((abortSignal) =>
-    gemini().models.embedContent({
-      model,
-      contents: texts,
-      config: { abortSignal, taskType: purpose === "query" ? "RETRIEVAL_QUERY" : "RETRIEVAL_DOCUMENT" },
-    }),
-  );
-  const vectors = (response.embeddings ?? []).map((e) => e.values ?? []);
-  if (vectors.length !== texts.length || vectors.some((v) => v.length === 0)) {
+  // One request per text: gemini-embedding-2 merges a list of texts into a single combined vector,
+  // which would break the one-vector-per-text pairing. Sent a few at a time to stay inside rate limits.
+  const taskType = purpose === "query" ? "RETRIEVAL_QUERY" : "RETRIEVAL_DOCUMENT";
+  const vectors: number[][] = [];
+  for (let i = 0; i < texts.length; i += EMBED_CONCURRENCY) {
+    const group = texts.slice(i, i + EMBED_CONCURRENCY);
+    const results = await Promise.all(
+      group.map(async (text) => {
+        for (let attempt = 1; ; attempt++) {
+          await takeQuotaSlot(embedQuota, options.maxQuotaWaitMs ?? aiConfig.timeoutMs);
+          try {
+            const response = await withTimeout((abortSignal) => gemini().models.embedContent({ model, contents: text, config: { abortSignal, taskType } }));
+            return response.embeddings?.length === 1 ? (response.embeddings[0].values ?? []) : [];
+          } catch (error) {
+            // A 429 means "too many requests this minute": wait a moment and try again.
+            const quota = (error as { cause?: { status?: number } }).cause?.status === 429;
+            if (!quota || attempt >= EMBED_MAX_ATTEMPTS) throw error;
+            await new Promise((resolve) => setTimeout(resolve, EMBED_RETRY_MS * attempt));
+          }
+        }
+      }),
+    );
+    vectors.push(...results);
+  }
+  if (vectors.some((v) => v.length === 0)) {
     throw new AiUnavailableError("invalid-response", "Gemini returned the wrong number of embeddings");
   }
   return vectors;
@@ -139,6 +179,7 @@ export async function generateJson<T>(prompt: string, schema: z.ZodType<T>, opti
   const model = process.env.GEMINI_MODEL;
   if (!model) throw new AiUnavailableError("no-model", "GEMINI_MODEL is not set");
 
+  await takeQuotaSlot(generateQuota, aiConfig.timeoutMs);
   const response = await withTimeout((abortSignal) =>
     gemini().models.generateContent({
       model,

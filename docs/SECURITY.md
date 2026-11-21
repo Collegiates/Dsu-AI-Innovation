@@ -12,6 +12,7 @@ Each security measure in the app and the test that proves it.
 | API input validated with zod: max 100 items, max 100 characters each (101 and 500 rejected), wrong types and unknown fields rejected, body size capped while reading (an oversized or endless body is never held in memory) | `src/lib/api/schemas.ts`, `src/lib/api/http.ts` | `tests/security/api-routes.test.ts`, `src/lib/api/http.test.ts` |
 | Generic error messages, never stack traces or file paths | `src/lib/api/http.ts`, API routes | `tests/security/api-routes.test.ts` |
 | Rate limit: 30 requests/minute per address on AI routes | `src/lib/ai/rate-limit.ts` | `src/lib/ai/rate-limit.test.ts`, `tests/security/api-routes.test.ts` |
+| Our own outgoing Gemini limit: at most 90 embedding and 10 text calls per minute, under Google's free-tier quota. A page request over the limit falls back to plain code at once instead of waiting; a "quota exceeded" (429) answer is retried with a growing wait | `src/lib/ai/quota.ts`, `src/lib/ai/gemini.ts`, limits in `aiConfig` | `src/lib/ai/quota.test.ts`, `src/lib/ai/gemini.embed.test.ts` |
 | 5-second timeout on Gemini, with fallback | `src/lib/ai/gemini.ts` | `src/lib/ai/explainSwap.test.ts` (timeout → template) |
 | Prompt injection: typed text never enters a prompt; treated as a plain list item | `src/lib/matching/`, `src/lib/ai/explainSwap.ts` | `src/lib/matching/core.test.ts`, `tests/security/api-routes.test.ts`, golden set |
 | AI text checked before display (amounts, names, HTML, length) | `src/lib/ai/validators.ts` | `src/lib/ai/validators.test.ts` |

@@ -51,13 +51,19 @@ export const aiConfig = {
   // Embedding similarity (cosine, from 0 to 1) at or above which a match is labeled "Same product".
   sameProductThreshold: 0.8,
   // Below sameProductThreshold but at or above this, a match is labeled "Similar"; lower means "No match".
-  similarThreshold: 0.6,
+  // 0.66 measured with gemini-embedding-001 on Nov 21: real matches scored 0.68–0.79, non-matches 0.60–0.64.
+  // Re-check with npm run eval after changing GEMINI_EMBED_MODEL, since each model scores on its own scale.
+  similarThreshold: 0.66,
   // Keyword fallback: share of the typed words that must be found in a product to count as a match.
   keywordMatchThreshold: 0.5,
   // How many nearest catalog products the embedding search keeps before code filters them.
   topCandidates: 5,
   // Every Gemini call gives up after this long and the app uses its non-AI fallback instead.
   timeoutMs: 5000,
+  // Most Gemini calls we send per minute, kept just under Google's free-tier limits (embeddings: 100 per minute).
+  // Over the limit, a page request falls back to plain code instead of waiting; the build script waits.
+  embedRequestsPerMinute: 90,
+  generateRequestsPerMinute: 10,
   // Longest swap explanation, in words, that Gemini may write.
   maxExplanationWords: 25,
 } as const;

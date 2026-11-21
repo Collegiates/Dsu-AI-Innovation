@@ -12,7 +12,11 @@ import { loadProductEmbeddings } from "./embeddings";
  * Example: matchList(["2 gal milk", "lawn mower"], products) → [Same product (milk), No match].
  */
 export async function matchList(items: string[], catalog: readonly Product[]): Promise<MatchResult[]> {
-  const productVectors = loadProductEmbeddings();
+  const saved = loadProductEmbeddings();
+  // Saved embeddings from an older catalog would silently hide every product they don't cover,
+  // so they are only used when they cover the whole catalog. Fix: npm run build-embeddings.
+  const productVectors = saved && catalog.every((p) => saved.has(p.id)) ? saved : null;
+  if (saved && !productVectors) console.warn("[matching] using keyword fallback: embeddings-stale");
   let queryVectors: number[][] | null = null;
   if (productVectors) {
     try {

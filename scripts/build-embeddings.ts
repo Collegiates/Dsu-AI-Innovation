@@ -27,7 +27,8 @@ async function main() {
   // Gemini accepts a limited number of texts per request, so send them in batches.
   const batch = async (items: string[], purpose: "query" | "document") => {
     const out: number[][] = [];
-    for (let i = 0; i < items.length; i += 50) out.push(...(await embedTexts(items.slice(i, i + 50), purpose)));
+    // The script can wait out the per-minute limit (up to 2 minutes per call); a page request can't.
+    for (let i = 0; i < items.length; i += 50) out.push(...(await embedTexts(items.slice(i, i + 50), purpose, { maxQuotaWaitMs: 120_000 })));
     return out;
   };
 
