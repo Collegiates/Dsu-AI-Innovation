@@ -6,7 +6,9 @@ For each feature: what it does, the page URL, the code files and the test files.
 
 **What it does:** Takes the weekly list (the products the shopper usually buys) and decides which store(s) on the commute to stop at and what to buy at each. It tries every group of 1 to 5 stores, buys each item at the cheapest store in that group (only swapping to a product with the same group and variant), and scores each trip as groceries + gas + the shopper's time valued by their preference (fastest / balanced / maxSavings). Trips that get every item win first. It returns the recommended trip, the cheapest single-store trip and the fastest trip, each with savings against the usual products at the usual store. Items no store carries are listed as missing, never priced at $0. Pure code, no AI.
 
-**Page:** `/trip` (UI not built yet).
+**Page:** `/trip`: the main demo screen. A three-way switch ("Get home fastest" / "Balance" / "Maximize savings", saved in the browser) re-plans instantly in the browser. Left: the commute drawing with the chosen stops and every store's detour, then the cost breakdown (groceries, estimated gas with the miles × $0.15 shown, trip total, the usual-trip total, extra minutes split into detours and stop time). Right: one card per stop with the store, detour, every item and the subtotal; cheaper equivalents are marked. Missing and unmatched items are listed, never priced. Below: "Cheapest single store" vs. "Fastest" vs. "Recommended". DataSourceNote at the bottom. Screenshot: `docs/screenshots/trip-1440x900.png`.
+
+**Page code:** `src/app/trip/page.tsx`, `src/components/trip/TripPlanner.tsx`, `src/components/trip/StopCard.tsx`, `src/components/trip/PlanComparison.tsx`, `src/components/shared/PreferencePicker.tsx`, `src/components/shared/CommuteLine.tsx`
 
 **Code:**
 - `src/lib/trip/optimizer.ts`: store combinations, scoring, recommended/cheapest/fastest plans, baseline savings
@@ -15,7 +17,7 @@ For each feature: what it does, the page URL, the code files and the test files.
 - `src/lib/pricing/money.ts`: exact cents and money formatting
 - `src/lib/config/app.ts`: gas cost, minutes per extra stop, value of time per preference
 
-**Tests:** `src/lib/trip/optimizer.test.ts`, `src/lib/trip/basket.test.ts`, `src/lib/pricing/price.test.ts`, `src/lib/pricing/money.test.ts`
+**Tests:** `src/lib/trip/optimizer.test.ts`, `src/lib/trip/basket.test.ts`, `src/lib/pricing/price.test.ts`, `src/lib/pricing/money.test.ts`, `src/components/trip/TripPlanner.test.tsx`, `tests/e2e/trip.spec.ts`
 
 ## Data import and loading
 
