@@ -22,13 +22,10 @@ export function json(body: unknown, status = 200, headers: Record<string, string
  */
 export async function readBody<T>(request: Request, schema: z.ZodType<T>): Promise<{ ok: true; data: T } | { ok: false; response: Response }> {
   const invalid = { ok: false as const, response: json({ error: GENERIC_ERRORS.invalid }, 400) };
-  let text: string;
-  try {
-    text = await request.text();
-  } catch {
-    return invalid;
-  }
-  if (text.length > MAX_BODY_CHARS) return invalid;
+  // A declared size over the limit is refused before reading anything.
+  if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_CHARS) return invalid;
+  const text = await readTextUpTo(request, MAX_BODY_CHARS);
+  if (text === null) return invalid;
   let raw: unknown;
   try {
     raw = JSON.parse(text);
@@ -37,4 +34,28 @@ export async function readBody<T>(request: Request, schema: z.ZodType<T>): Promi
   }
   const parsed = schema.safeParse(raw);
   return parsed.success ? { ok: true, data: parsed.data } : invalid;
+}
+
+/**
+ * Reads a request body piece by piece and stops as soon as it passes the limit, so a huge or endless body
+ * is never held in memory. Returns null if the body is too big or can't be read.
+ */
+async function readTextUpTo(request: Request, maxChars: number): Promise<string | null> {
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) return text + decoder.decode();
+      text += decoder.decode(value, { stream: true });
+      if (text.length > maxChars) {
+        await reader.cancel().catch(() => {});
+        return null;
+      }
+    }
+  } catch {
+    return null;
+  }
 }

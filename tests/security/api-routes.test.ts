@@ -39,6 +39,17 @@ describe("POST /api/match", async () => {
 
   it("rejects an item longer than 100 characters", async () => {
     expect((await POST(post({ items: ["x".repeat(101)] }))).status).toBe(400);
+    const res = await POST(post({ items: ["x".repeat(500)] }));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Invalid request." });
+  });
+
+  it("rejects wrong types with a 400 and the same generic message", async () => {
+    for (const body of [{ items: [123] }, { items: null }, { items: [{ text: "milk" }] }, ["milk"], null, 42]) {
+      const res = await POST(post(JSON.stringify(body)));
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({ error: "Invalid request." });
+    }
   });
 
   it("rejects bad JSON, empty lists and unexpected fields", async () => {
