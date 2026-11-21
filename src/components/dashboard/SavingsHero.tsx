@@ -4,13 +4,14 @@ import { DataSourceNote } from "@/components/shared/DataSourceNote";
 import { Money } from "@/components/shared/Money";
 import { Button } from "@/components/ui/button";
 import type { StoreRanking } from "@/lib/trip/rankStores";
+import { SwapSavingsLine } from "./SwapSavingsLine";
 
 /**
  * The Dashboard's main block: this week's best single store for the whole list, what it saves against the
  * runner-up (on the items both sell), and every store's total as a bar. All numbers are computed by code.
  * Example: "Shop at ALDI: $57.34 · You save $1.20 vs. Walmart on the 4 items both stores sell".
  */
-export function SavingsHero({ ranking, itemCount }: { ranking: StoreRanking; itemCount: number }) {
+export function SavingsHero({ ranking, itemCount, swapSavingsCents = [] }: { ranking: StoreRanking; itemCount: number; swapSavingsCents?: number[] }) {
   const { winner, quotes, savings } = ranking;
   const max = Math.max(1, ...quotes.map((q) => q.totalCents));
 
@@ -40,6 +41,8 @@ export function SavingsHero({ ranking, itemCount }: { ranking: StoreRanking; ite
           "One trip, one store, the whole list."
         )}
       </p>
+
+      <SwapSavingsLine weeklySavingsCents={swapSavingsCents} />
 
       <dl className="mt-7 space-y-3">
         {quotes.map((q) => (

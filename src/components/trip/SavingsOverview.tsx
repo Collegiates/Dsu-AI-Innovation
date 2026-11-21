@@ -45,8 +45,19 @@ export function discountItems(plan: TripPlan, basket: readonly BasketItem[], pro
  * at which store, and how much each saves compared with the usual product, plus the total.
  * Example: "4 discounted items · you save $1.62".
  */
-export function SavingsOverview({ plan, basket, productsById }: { plan: TripPlan; basket: readonly BasketItem[]; productsById: ReadonlyMap<string, Product> }) {
-  const items = discountItems(plan, basket, productsById);
+export function SavingsOverview({
+  plan,
+  basket,
+  productsById,
+  minSavingsCents = 0,
+}: {
+  plan: TripPlan;
+  basket: readonly BasketItem[];
+  productsById: ReadonlyMap<string, Product>;
+  /** Items saving less than this a week are left out, matching the shopper's threshold. */
+  minSavingsCents?: number;
+}) {
+  const items = discountItems(plan, basket, productsById).filter((i) => i.savingCents >= Math.max(1, minSavingsCents) || (minSavingsCents === 0 && i.onSale));
   const total = items.reduce((sum, i) => sum + i.savingCents, 0);
   return (
     <Dialog>

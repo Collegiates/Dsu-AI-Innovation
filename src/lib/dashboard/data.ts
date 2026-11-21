@@ -10,12 +10,15 @@ import { fetchRecalls } from "@/lib/recalls/openfda";
 import { basketFromList } from "@/lib/trip/demoBasket";
 import { DEFAULT_USUAL_STORE_ID, optimizeTrip, type TripResult } from "@/lib/trip/optimizer";
 import { rankStores, type StoreRanking } from "@/lib/trip/rankStores";
+import { findSwaps } from "@/lib/swaps/findSwaps";
 
 /** Everything the Dashboard shows, all computed by code from the real data files. */
 export type DashboardData = {
   trip: TripResult;
   /** The one store to shop at this week, and every store's whole-list total. */
   ranking: StoreRanking;
+  /** Weekly savings of each swap available at the winning store, in cents. */
+  swapSavingsCents: number[];
   stores: Store[];
   /** Stores that have collected prices; the others are shown as "Prices coming soon". */
   pricedStoreIds: string[];
@@ -42,6 +45,9 @@ export async function getDashboardData(preference: TripPreference = "balanced"):
   const trip = optimizeTrip({ basket, products, stores, preference, usualStoreId: DEFAULT_USUAL_STORE_ID });
   // One trip a week to one store: the winner is the store with the most of the list at the lowest total.
   const ranking = rankStores(basket, products, stores);
+  const swapSavingsCents = findSwaps({ basket, products })
+    .filter((s) => s.to.storeId === ranking.winner?.store.id)
+    .map((s) => s.savingsCents);
 
   // Check what the shopper will actually buy, plus their usual products.
   const checked = new Map((ranking.winner?.plan.stops ?? []).flatMap((s) => s.items.map((i) => [i.product.id, i.product] as const)));
@@ -57,6 +63,6 @@ export async function getDashboardData(preference: TripPreference = "balanced"):
 
   return {
     ok: true,
-    data: { trip, ranking, stores, pricedStoreIds: [...new Set(products.map((p) => p.storeId))], itemCount: basket.length, unmatched, recall: recallMatches[0] ?? null, recallCount: recallMatches.length, deals },
+    data: { trip, ranking, swapSavingsCents, stores, pricedStoreIds: [...new Set(products.map((p) => p.storeId))], itemCount: basket.length, unmatched, recall: recallMatches[0] ?? null, recallCount: recallMatches.length, deals },
   };
 }

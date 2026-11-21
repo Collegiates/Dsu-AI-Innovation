@@ -4,6 +4,7 @@ import { EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, type ReactNode } from "react";
 import { StorePicker } from "@/components/plan/StorePicker";
+import { SavingsThreshold } from "@/components/shared/SavingsThreshold";
 import { AddStoreForm } from "./AddStoreForm";
 import { UsualListEditor } from "./UsualListEditor";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
@@ -54,6 +55,9 @@ export function SettingsView({ products, stores }: { products: Product[]; stores
     <div className="grid grid-cols-2 items-start gap-6">
       <div className="space-y-6">
         <UsualListEditor />
+        <Section id="threshold-title" title="Savings threshold" description="Only recommend swaps that save at least this much a week. Smaller swaps are hidden on the Trip Plan, the Overview and Smart Swaps.">
+          <SavingsThreshold id="settings-threshold" />
+        </Section>
         <StorePicker stores={stores} pricedStoreIds={pricedStoreIds} columns={2} />
       </div>
 

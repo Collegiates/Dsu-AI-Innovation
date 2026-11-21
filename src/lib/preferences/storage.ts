@@ -19,6 +19,8 @@ const SCHEMAS = {
     schema: z.array(z.object({ id: short, name: z.string().trim().min(1).max(100), address: z.string().trim().min(1).max(200) })).max(20),
     fallback: [] as { id: string; name: string; address: string }[],
   },
+  // The smallest weekly saving (in cents) worth recommending a swap for; smaller swaps are not suggested.
+  minSavingsCents: { schema: z.number().int().min(0).max(10_000), fallback: 0 as number },
   // The shopper's usual weekly list, set up in Settings; "Load my usual list" and receipt uploads start from it.
   usualList: { schema: z.array(z.string().trim().min(1).max(100)).max(100), fallback: [...DEMO_LIST] as string[] },
 } as const;

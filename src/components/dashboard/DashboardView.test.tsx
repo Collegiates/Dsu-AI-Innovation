@@ -27,7 +27,7 @@ function fixture(overrides: Partial<DashboardData> = {}): DashboardData {
     preference: "maxSavings",
   });
   const ranking = rankStores([{ usualProductId: "walmart-dover--coffee" }, { usualProductId: "walmart-dover--milk" }], products, [walmart, aldi]);
-  return { trip, ranking, stores: [walmart, aldi], pricedStoreIds: ["walmart-dover", "aldi-dover"], itemCount: 2, unmatched: [], recall: null, recallCount: 0, deals: [], ...overrides };
+  return { trip, ranking, swapSavingsCents: [], stores: [walmart, aldi], pricedStoreIds: ["walmart-dover", "aldi-dover"], itemCount: 2, unmatched: [], recall: null, recallCount: 0, deals: [], ...overrides };
 }
 
 describe("DashboardView", () => {

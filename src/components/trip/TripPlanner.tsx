@@ -7,9 +7,11 @@ import { DataSourceNote } from "@/components/shared/DataSourceNote";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Money } from "@/components/shared/Money";
+import { SavingsThreshold } from "@/components/shared/SavingsThreshold";
 import { Button } from "@/components/ui/button";
 import type { Product, Store } from "@/lib/data/schema";
 import { basketFromEntries } from "@/lib/list/list";
+import { weeklyToMonthlyCents } from "@/lib/pricing/monthly";
 import { usePreference } from "@/lib/preferences/usePreference";
 import { findSwaps, type Swap } from "@/lib/swaps/findSwaps";
 import { rankStores } from "@/lib/trip/rankStores";
@@ -39,6 +41,7 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
   const { value: selectedIds, ready: storesReady } = usePreference("selectedStores");
   const { value: hiddenBrands } = usePreference("hiddenBrands");
   const { value: hiddenProducts } = usePreference("hiddenProducts");
+  const { value: minSavingsCents } = usePreference("minSavingsCents");
   const receiptNote = useSyncExternalStore(noSubscribe, readReceiptNote, () => null);
   const productsById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
   const { basket, unmatched } = useMemo(() => basketFromEntries(entries, productsById), [entries, productsById]);
@@ -52,8 +55,8 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
   const swapsByLine = useMemo(() => {
     const winnerId = ranking.winner?.store.id;
     const swaps = findSwaps({ basket, products, hiddenBrands, hiddenProducts });
-    return new Map<number, Swap>(swaps.filter((s) => s.to.storeId === winnerId).map((s) => [s.basketIndex, s]));
-  }, [basket, products, ranking, hiddenBrands, hiddenProducts]);
+    return new Map<number, Swap>(swaps.filter((s) => s.to.storeId === winnerId && s.savingsCents >= minSavingsCents).map((s) => [s.basketIndex, s]));
+  }, [basket, products, ranking, hiddenBrands, hiddenProducts, minSavingsCents]);
 
   if (!listReady || !storesReady) {
     return (
@@ -93,6 +96,8 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
   }
 
   const { winner, quotes, savings } = ranking;
+  // What the recommended swaps at the winning store save, at or above the shopper's threshold.
+  const swapWeeklyCents = [...swapsByLine.values()].reduce((sum, s) => sum + s.savingsCents, 0);
   const stop = winner?.plan.stops[0];
   const pricedIds = new Set(products.map((p) => p.storeId));
   const unpricedPicked = stores.filter((s) => selectedIds.includes(s.id) && !pricedIds.has(s.id));
@@ -145,6 +150,17 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
               `One trip, one store${winner.missing === 0 ? ": everything on your list is here" : ""}.`
             ) : null}
           </p>
+          {swapWeeklyCents > 0 ? (
+            <p className="mt-2 font-display text-2xl font-semibold">
+              Swaps save you <Money cents={swapWeeklyCents} className="text-savings" /> a week ·{" "}
+              <Money cents={weeklyToMonthlyCents(swapWeeklyCents)} className="text-savings" /> a month
+            </p>
+          ) : (
+            <p className="mt-2 text-sm text-muted-foreground">No swaps at or above your savings threshold.</p>
+          )}
+          <div className="mt-3">
+            <SavingsThreshold id="trip-threshold" />
+          </div>
           <Button asChild className="mt-4">
             <Link href="/list">
               See your grocery list <ArrowRight aria-hidden />
@@ -184,7 +200,7 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
             <h2 id="stops-title" className="font-display text-xl font-semibold">
               Your grocery list at {stop.store.chain}
             </h2>
-            <SavingsOverview plan={winner!.plan} basket={basket} productsById={productsById} />
+            <SavingsOverview plan={winner!.plan} basket={basket} productsById={productsById} minSavingsCents={minSavingsCents} />
           </div>
           <StopCard
             stop={stop}

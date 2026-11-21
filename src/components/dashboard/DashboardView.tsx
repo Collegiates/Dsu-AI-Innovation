@@ -15,7 +15,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-7">
           <AfterReceipt>
-            <SavingsHero ranking={data.ranking} itemCount={data.itemCount} />
+            <SavingsHero ranking={data.ranking} itemCount={data.itemCount} swapSavingsCents={data.swapSavingsCents} />
           </AfterReceipt>
         </div>
         <div className="col-span-5 flex flex-col gap-4">

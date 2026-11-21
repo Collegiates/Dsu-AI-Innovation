@@ -15,7 +15,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { postJson } from "@/lib/api/client";
 import type { Product, Store } from "@/lib/data/schema";
 import { basketFromEntries, replaceProduct, type ListEntry } from "@/lib/list/list";
+import { SavingsThreshold } from "@/components/shared/SavingsThreshold";
 import { usePreference } from "@/lib/preferences/usePreference";
+import { weeklyToMonthlyCents } from "@/lib/pricing/monthly";
 import { formatSize, formatUnitPrice } from "@/lib/pricing/money";
 import type { Swap } from "@/lib/swaps/findSwaps";
 
@@ -39,6 +41,7 @@ export function SwapsView({ products, stores }: { products: Product[]; stores: S
   const { value: entries, ready: listReady, save: saveList } = usePreference("list");
   const { value: hiddenBrands, ready: brandsReady, save: saveBrands } = usePreference("hiddenBrands");
   const { value: hiddenProducts, ready: productsReady, save: saveProducts } = usePreference("hiddenProducts");
+  const { value: minSavingsCents } = usePreference("minSavingsCents");
   const ready = listReady && brandsReady && productsReady;
   const productsById = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
   const { basket, entryIndexes } = useMemo(() => basketFromEntries(entries, productsById), [entries, productsById]);
@@ -80,7 +83,10 @@ export function SwapsView({ products, stores }: { products: Product[]; stores: S
 
   // Rows the shopper just hid disappear at once, before the refreshed list arrives.
   const hiddenBrandSet = new Set(hiddenBrands.map((b) => b.toLowerCase()));
-  const rows = loaded.swaps.filter((s) => !hiddenProducts.includes(s.to.id) && !hiddenBrandSet.has(s.to.brand.toLowerCase()));
+  // Swaps below the shopper's savings threshold aren't recommended.
+  const rows = loaded.swaps.filter(
+    (s) => !hiddenProducts.includes(s.to.id) && !hiddenBrandSet.has(s.to.brand.toLowerCase()) && s.savingsCents >= minSavingsCents,
+  );
   const weekly = rows.reduce((sum, s) => sum + s.savingsCents, 0);
   const refreshing = loaded.key !== requestKey;
 
@@ -116,12 +122,13 @@ export function SwapsView({ products, stores }: { products: Product[]; stores: S
           {rows.length > 0 ? (
             <>
               <span className="font-display text-2xl font-semibold text-foreground">
-                Up to <Money cents={weekly} className="text-savings" /> a week
+                Up to <Money cents={weekly} className="text-savings" /> a week · <Money cents={weeklyToMonthlyCents(weekly)} className="text-savings" /> a month
               </span>
               <span className="block text-sm">if you take all {rows.length} swaps. Prices compared per unit, so different sizes are fair.</span>
             </>
           ) : null}
         </p>
+        <SavingsThreshold id="swaps-threshold" />
         <Link href="/settings" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline">
           <EyeOff aria-hidden className="size-4" />
           Manage hidden brands ({hiddenBrands.length + hiddenProducts.length})
