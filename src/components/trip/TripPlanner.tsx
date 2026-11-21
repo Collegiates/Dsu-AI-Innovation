@@ -15,7 +15,6 @@ import { weeklyToMonthlyCents } from "@/lib/pricing/monthly";
 import { usePreference } from "@/lib/preferences/usePreference";
 import { findSwaps, type Swap } from "@/lib/swaps/findSwaps";
 import { rankStores } from "@/lib/trip/rankStores";
-import { cn } from "@/lib/utils";
 import { SavingsOverview } from "./SavingsOverview";
 import { StopCard } from "./StopCard";
 
@@ -167,31 +166,56 @@ export function TripPlanner({ products, stores }: { products: Product[]; stores:
             </Link>
           </Button>
         </div>
-        <ul aria-label="Store totals" className="min-w-64 space-y-1.5 text-sm">
-          {quotes.map((q) => (
-            <li key={q.store.id} className={cn("flex items-baseline justify-between gap-6 rounded-md px-2 py-1", q === winner && "bg-primary-soft font-semibold")}>
-              <span>{q.store.chain}</span>
-              <span className="text-right">
-                <Money cents={q.totalCents} />
-                <span className="block text-xs font-normal text-muted-foreground">
-                  {q.items} item{q.items === 1 ? "" : "s"}
-                  {q !== winner && q.winnerCentsForSameItems !== null ? (
-                    <>
-                      {" "}
-                      · same items at {winner?.store.chain}: <Money cents={q.winnerCentsForSameItems} />
-                    </>
-                  ) : null}
-                </span>
-              </span>
-            </li>
-          ))}
-          {unpricedPicked.map((s) => (
-            <li key={s.id} className="flex justify-between gap-6 px-2 py-1 text-muted-foreground">
-              <span>{s.chain}</span>
-              <span>No prices yet</span>
-            </li>
-          ))}
-        </ul>
+        <div aria-label="Store comparison" className="w-80 space-y-3 text-sm">
+          {quotes
+            .filter((q) => q !== winner && q.winnerCentsForSameItems !== null)
+            .map((q) => {
+              const winnerSame = q.winnerCentsForSameItems ?? 0;
+              const diff = q.totalCents - winnerSame;
+              const rest = (winner?.totalCents ?? 0) - winnerSame;
+              const restItems = (winner?.items ?? 0) - q.items;
+              return (
+                <div key={q.store.id} className="rounded-xl border p-4">
+                  <p className="font-medium">Same {q.items} items at both stores</p>
+                  <dl className="mt-2 space-y-1">
+                    <div className="flex justify-between">
+                      <dt>{winner?.store.chain}</dt>
+                      <dd className="font-semibold">
+                        <Money cents={winnerSame} />
+                      </dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt>{q.store.chain}</dt>
+                      <dd className="font-semibold">
+                        <Money cents={q.totalCents} />
+                      </dd>
+                    </div>
+                  </dl>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {diff > 0 ? (
+                      <>
+                        {winner?.store.chain} is <Money cents={diff} /> cheaper on these.
+                      </>
+                    ) : diff < 0 ? (
+                      <>
+                        {q.store.chain} is <Money cents={-diff} /> cheaper on these
+                      </>
+                    ) : (
+                      "Same price on these"
+                    )}
+                    {restItems > 0 ? (
+                      <>
+                        {diff < 0 ? ", but " : " "}
+                        {q.store.chain} doesn&apos;t carry the other {restItems} items (<Money cents={rest} /> at {winner?.store.chain}), so {winner?.store.chain} is the one trip that
+                        gets everything.
+                      </>
+                    ) : null}
+                  </p>
+                </div>
+              );
+            })}
+          {unpricedPicked.length > 0 ? <p className="text-xs text-muted-foreground">No prices yet for {unpricedPicked.map((s) => s.chain).join(", ")}.</p> : null}
+        </div>
       </section>
 
       {stop ? (
